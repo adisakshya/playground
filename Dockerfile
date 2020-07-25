@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     git \
     ssh \
     sudo \
-    lsb-release
+    lsb-release \
+    net-tools
 RUN rm -rf /var/lib/apt/lists/*
 
 # Set locales
@@ -25,6 +26,13 @@ ENV SHELL=/bin/bash
 # Add User
 RUN adduser --gecos '' --disabled-password coder && \
   echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+
+RUN ARCH="$(dpkg --print-architecture)" && \
+    curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.4.1/fixuid-0.4.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
+    chown root:root /usr/local/bin/fixuid && \
+    chmod 4755 /usr/local/bin/fixuid && \
+    mkdir -p /etc/fixuid && \
+    printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
