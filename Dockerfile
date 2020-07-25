@@ -13,6 +13,7 @@ USER root
 RUN apt-get update && apt-get install -y \
     build-essential \
     software-properties-common \
+    libssl-dev \
     ssh \
     sudo \
     lsb-release \
@@ -57,6 +58,14 @@ RUN add-apt-repository \
 RUN apt-get update -qq \
     && apt-get install docker-ce -y
 RUN usermod -aG docker ${username}
+
+# Install NVM and NodeJS
+RUN apt-get install -y \
+    nodejs \
+    npm
+
+# Install gtop
+RUN npm install gtop -g
 
 # Clean
 RUN apt-get clean
