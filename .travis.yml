@@ -1,0 +1,33 @@
+sudo: required
+
+language: node_js
+node_js:
+    - "12"
+
+services:
+  - docker
+
+env:
+  global:
+    - IMAGE_NAME=$DOCKER_USER/playground
+      
+before_script:
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' Dockerfile)"
+  - docker info
+  - docker pull "$IMAGE_NAME" || true
+
+install:
+  - echo "install nothing!"
+
+script:
+  - docker build -t $IMAGE_NAME .
+
+after_script:
+  - docker images
+
+after_success:
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
+  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
+  - docker push $IMAGE_NAME:latest
+  - docker push $IMAGE_NAME:$VERSION
