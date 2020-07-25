@@ -1,7 +1,7 @@
 FROM debian:stable-slim
 
 # Version
-ENV PLAYGROUND_VERSION=1.0.0
+ENV PLAYGROUND_VERSION 1.0.0
 
 # Username
 ARG username='player'
@@ -23,10 +23,10 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # Set locales
 RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen && locale-gen
-ENV LANG=en_US.UTF-8
+ENV LANG en_US.UTF-8
 
 # Set shell
-ENV SHELL=/bin/bash
+ENV SHELL /bin/bash
 
 # Add User
 RUN adduser --gecos '' --disabled-password ${username} && \
