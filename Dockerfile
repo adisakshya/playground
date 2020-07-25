@@ -49,6 +49,9 @@ RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh
     source ~/.profile \
     nvm install 12.17.0
 
+# System monitoring tool
+RUN npm install gtop -g
+
 # Expose port
 EXPOSE 8080
 
