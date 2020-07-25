@@ -3,6 +3,9 @@ FROM debian:stable-slim
 # Version
 ENV PLAYGROUND_VERSION=1.0.0
 
+# Username
+ARG username='player'
+
 # Install packages
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -26,8 +29,8 @@ ENV LANG=en_US.UTF-8
 ENV SHELL=/bin/bash
 
 # Add User
-RUN adduser --gecos '' --disabled-password coder && \
-  echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+RUN adduser --gecos '' --disabled-password ${username} && \
+  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 
 # Fixuid
 RUN ARCH="$(dpkg --print-architecture)" && \
@@ -35,7 +38,7 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     chown root:root /usr/local/bin/fixuid && \
     chmod 4755 /usr/local/bin/fixuid && \
     mkdir -p /etc/fixuid && \
-    printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
+    printf "user: ${username}\ngroup: ${username}\n" > /etc/fixuid/config.yml
 
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
@@ -45,10 +48,10 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh
 EXPOSE 8080
 
 # Set user
-USER coder
+USER ${username}
 
 # Define work-directory
-WORKDIR /home/coder
+WORKDIR /home/${username}
 
 # Entrypoint
 ENTRYPOINT ["dumb-init", "fixuid", "-q", "/usr/bin/code-server", "--bind-addr", "0.0.0.0:8080", "."]
