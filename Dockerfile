@@ -5,15 +5,17 @@ ENV PLAYGROUND_VERSION=1.0.0
 
 # Install packages
 RUN apt-get update && apt-get install -y \
-    curl \
-    dumb-init \
-    locales \
-    nano \
-    git \
+    build-essential \
+    software-properties-common \
     ssh \
     sudo \
     lsb-release \
-    net-tools
+    net-tools \
+    dumb-init \
+    curl \
+    locales \
+    nano \
+    git
 RUN rm -rf /var/lib/apt/lists/*
 
 # Set locales
@@ -27,6 +29,7 @@ ENV SHELL=/bin/bash
 RUN adduser --gecos '' --disabled-password coder && \
   echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 
+# Fixuid
 RUN ARCH="$(dpkg --print-architecture)" && \
     curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.4.1/fixuid-0.4.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
     chown root:root /usr/local/bin/fixuid && \
