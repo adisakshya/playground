@@ -44,6 +44,11 @@ RUN ARCH="$(dpkg --print-architecture)" && \
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
+# Install NodeJS
+RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash && \
+    source ~/.profile \
+    nvm install 12.17.0
+
 # Expose port
 EXPOSE 8080
 
