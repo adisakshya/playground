@@ -17,11 +17,16 @@ RUN apt-get update && apt-get install --no-install-recommends --no-upgrade -y \
     ssh \
     sudo \
     lsb-release \
+    net-tools \
     dumb-init \
     curl \
     locales \
     bash && \
     rm -rf /var/lib/apt/lists/*
+
+# Set shell to bash
+RUN chsh -s /bin/bash
+ENV SHELL /bin/bash
 
 # Set locales
 RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen && locale-gen
