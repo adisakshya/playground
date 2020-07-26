@@ -60,15 +60,19 @@ RUN apt-get update -qq \
 RUN usermod -aG docker ${username}
 
 # Install NVM and NodeJS
-RUN apt-get install -y \
-    nodejs \
-    npm
+ENV NODE_VERSION 12.17.0
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm install ${NODE_VERSION}
 
-# Install gtop
-RUN npm install gtop -g
-
-# Clean
-RUN apt-get clean
+# Install NodeJS and gtop
+ENV NODE_VERSION 12
+RUN curl -sL -o- https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash && \
+    apt install nodejs -y && \
+    npm install gtop -g && \
+    rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 8080
