@@ -50,22 +50,15 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # Install docker 
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-RUN add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/debian \
-   $(lsb_release -cs) \
-   stable"
-RUN apt-get update -qq \
-    && apt-get install docker-ce -y
-RUN usermod -aG docker ${username}
-
-# Install NVM and NodeJS
-ENV NODE_VERSION 12.17.0
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash && \
-    export NVM_DIR="$HOME/.nvm" && \
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm && \
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
-    nvm install ${NODE_VERSION}
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) \
+    stable" && \
+    apt-get update -qq && \
+    apt-get install docker-ce -y && \
+    usermod -aG docker ${username} && \ 
+    rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS and gtop
 ENV NODE_VERSION 12
@@ -84,4 +77,4 @@ USER ${username}
 WORKDIR /home/${username}
 
 # Entrypoint
-ENTRYPOINT ["dumb-init", "fixuid", "-q /usr/bin/code-server", "--bind-addr 0.0.0.0:8080", "."]
+ENTRYPOINT ["dumb-init", "fixuid", "-q", "/usr/bin/code-server", "--bind-addr", "0.0.0.0:8080", "."]
