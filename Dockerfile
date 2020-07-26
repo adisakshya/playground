@@ -30,15 +30,10 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8
 
-# Set shell
-ENV SHELL /bin/bash
-
-# Add User
+# Add User and fixuid
 RUN adduser --gecos '' --disabled-password ${username} && \
-  echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
-
-# Fixuid
-RUN ARCH="$(dpkg --print-architecture)" && \
+    echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd && \
+    ARCH="$(dpkg --print-architecture)" && \
     curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.4.1/fixuid-0.4.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
     chown root:root /usr/local/bin/fixuid && \
     chmod 4755 /usr/local/bin/fixuid && \
