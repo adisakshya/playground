@@ -10,21 +10,18 @@ ARG username='player'
 USER root
 
 # Install packages
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends --no-upgrade -y \
     build-essential \
     software-properties-common \
-    libssl-dev \
+    gnupg2 \
     ssh \
     sudo \
     lsb-release \
-    net-tools \
     dumb-init \
     curl \
     locales \
-    nano \
-    bash \
-    git
-RUN rm -rf /var/lib/apt/lists/*
+    bash && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set locales
 RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen && locale-gen
