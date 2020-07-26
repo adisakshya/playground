@@ -46,7 +46,6 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     printf "user: ${username}\ngroup: ${username}\n" > /etc/fixuid/config.yml
 
 # Install code-server
-RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # Install docker 
