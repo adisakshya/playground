@@ -29,3 +29,16 @@ $ mkcert example.com 192.168.99.100 localhost
 ```
 - This will generate the required certificates for you.
 - Update the certificate names in nginx/conf file, and we are good to go.
+
+The ```mkcert -install``` step on Windows does not work for the Firefox browser. **You need to add the created root certificate authority to the security configuration by your self.** So if you are using firefox on windows follow th below steps after installtion; [courtesy](https://ddev.readthedocs.io/en/stable/#windows-and-firefox-mkcert-install-additional-instructions)
+
+- Run ```mkcert -install```
+- Run ```mkcert -CAROOT```, to see the local folder used for the newly created root certificate authority
+- Open the Firefox settings
+- Enter ```certificates``` into the search box on the top
+- Click on ```view certificates```
+- Select the tab ```certificate authorities```
+- Click to ```import```
+- Go to the folder where your root certificate authority was stored
+- Select the file ```rootCA.pem```
+- Click to ```open```
