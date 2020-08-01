@@ -5,6 +5,10 @@ node_js:
 services:
   - docker
 
+branches:
+  only:
+    - master
+
 env:
   global:
     - IMAGE_NAME=$DOCKER_USER/playground
@@ -16,36 +20,31 @@ before_script:
   - docker info
   # Pull latest playground docker image
   - docker pull "$IMAGE_NAME" || true
+  # Install docker-compose
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 install:
   - echo "install nothing!"
 
-stages:
-  - name: build
-  - name: deploy
-    if: branch = master AND type = push AND fork = false
+# Build playground and proxy
+script:
+  - docker build -t $IMAGE_NAME -f src/Dockerfile --cache-from $IMAGE_NAME .
+  - docker-compose -f src/reverse-proxy/docker-compose.yml build
 
-docker_login:
-    before_script:
-      - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+# List all docker images
+after_script:
+  - docker images
 
-jobs:
-  include:
-    # Build playground docker image
-    - stage: build
-      script:
-        - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
-        - docker images
-    # Build and push playground docker image to dockerhub
-    - stage: deploy
-      before_script: *docker_login
-      script:
-        - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
-        - docker images
-        - docker tag playground $IMAGE_NAME:latest
-        - docker tag playground $IMAGE_NAME:$VERSION
-        - docker push $IMAGE_NAME:latest
-        - docker push $IMAGE_NAME:$VERSION
+# Push to playground docker image to dockerhub
+after_success:
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
+  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
+  - docker push $IMAGE_NAME:latest
+  - docker push $IMAGE_NAME:$VERSION
 
 # Don't notify me when things fail
 notifications:
