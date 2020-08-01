@@ -7,8 +7,9 @@ services:
 
 env:
   global:
+    # Image Name
     - IMAGE_NAME=$DOCKER_USER/playground
-      
+
 before_script:
   # Get version information
   - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' src/Dockerfile)"
@@ -16,6 +17,11 @@ before_script:
   - docker info
   # Pull latest playground docker image
   - docker pull "$IMAGE_NAME" || true
+  # Install docker-compose
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 install:
   - echo "install nothing!"
@@ -35,12 +41,14 @@ jobs:
     - stage: build
       script:
         - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
         - docker images
     # Build and push playground docker image to dockerhub
     - stage: deploy
       before_script: *docker_login
       script:
         - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
         - docker images
         - docker tag playground $IMAGE_NAME:latest
         - docker tag playground $IMAGE_NAME:$VERSION
