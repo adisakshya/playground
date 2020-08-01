@@ -1,5 +1,3 @@
-sudo: required
-
 language: node_js
 node_js:
     - "12"
@@ -12,22 +10,43 @@ env:
     - IMAGE_NAME=$DOCKER_USER/playground
       
 before_script:
-  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' Dockerfile)"
+  # Get version information
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' src/Dockerfile)"
+  # Confirm presence of docler
   - docker info
+  # Pull latest playground docker image
   - docker pull "$IMAGE_NAME" || true
 
 install:
   - echo "install nothing!"
 
-script:
-  - docker build -t $IMAGE_NAME .
+stages:
+  - name: build
+  - name: deploy
+    if: branch = master AND type = push AND fork = false
 
-after_script:
-  - docker images
+docker_login:
+    before_script:
+      - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
 
-after_success:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
-  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
-  - docker push $IMAGE_NAME:latest
-  - docker push $IMAGE_NAME:$VERSION
+jobs:
+  include:
+    # Build playground docker image
+    - stage: build
+      script:
+        - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
+        - docker images
+    # Build and push playground docker image to dockerhub
+    - stage: deploy
+      before_script: *docker_login
+      script:
+        - docker build -t playground -f src/Dockerfile --cache-from $IMAGE_NAME .
+        - docker images
+        - docker tag playground $IMAGE_NAME:latest
+        - docker tag playground $IMAGE_NAME:$VERSION
+        - docker push $IMAGE_NAME:latest
+        - docker push $IMAGE_NAME:$VERSION
+
+# Don't notify me when things fail
+notifications:
+  email: false
