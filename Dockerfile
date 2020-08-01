@@ -12,16 +12,15 @@ USER root
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends --no-upgrade -y \
     build-essential \
-    software-properties-common \
+    bash \
+    curl \
+    dumb-init \
     gnupg2 \
-    ssh \
-    sudo \
+    locales \
     lsb-release \
     net-tools \
-    dumb-init \
-    curl \
-    locales \
-    bash && \
+    software-properties-common \
+    sudo && \
     rm -rf /var/lib/apt/lists/*
 
 # Set shell to bash
@@ -56,17 +55,16 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     usermod -aG docker ${username} && \ 
     rm -rf /var/lib/apt/lists/*
 
-# Install NodeJS and gtop
+# Install NodeJS
 ENV NODE_VERSION 12
 RUN curl -sL -o- https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash && \
     apt install nodejs -y && \
-    npm install gtop -g && \
     rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 8080
 
-# Set user
+# Become player
 USER ${username}
 
 # Define work-directory
