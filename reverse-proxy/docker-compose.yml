@@ -3,7 +3,15 @@ version: '3.7'
 services:
     reverseproxy:
         build: ./nginx
+        networks: 
+            - playgroundNetwork
+        container_name: proxyPlayground
         ports:
             - '80:80'
             - '443:443'
         restart: always
+
+networks:
+    playgroundNetwork:
+        external:
+            name: playgroundNetwork
