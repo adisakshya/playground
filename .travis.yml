@@ -9,25 +9,43 @@ services:
 
 env:
   global:
+    # Image Name
     - IMAGE_NAME=$DOCKER_USER/playground
-      
+
 before_script:
-  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' Dockerfile)"
+  # Set version
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' src/Dockerfile)"
+  # Check docker presence
   - docker info
+  # Pull docker image for playground
   - docker pull "$IMAGE_NAME" || true
+  # Install docker-compose
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 install:
   - echo "install nothing!"
 
-script:
-  - docker build -t $IMAGE_NAME .
+jobs:
+  include:
+    # Build playground and proxy
+    - stage: build
+      script:
+        - docker build -t $IMAGE_NAME:$TRAVIS_COMMIT -f src/Dockerfile --cache-from $IMAGE_NAME .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker images
+    # Push playground docker image to dockerhub
+    - stage: deploy
+      script:
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        - docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:latest
+        - docker tag $IMAGE_NAME:$TRAVIS_COMMIT $IMAGE_NAME:$VERSION
+        - docker push $IMAGE_NAME:latest
+        - docker push $IMAGE_NAME:$VERSION
 
-after_script:
-  - docker images
-
-after_success:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
-  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
-  - docker push $IMAGE_NAME:latest
-  - docker push $IMAGE_NAME:$VERSION
+stages:
+  - name: build
+  - name: deploy
+    if: branch = master AND type != pull_request
