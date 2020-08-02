@@ -34,7 +34,7 @@ startPlayground() {
                 -p 8080:8080 \
                 -v "$(which docker)://usr/bin/docker" \
                 -v "//var/run/docker.sock://var/run/docker.sock:rw" \
-                -v "$(pwd)://home/player/projects" \
+                -v "//projects://home/player/projects" \
                 -u $(id -u):$(id -g) \
                 adisakshya/playground \
                 --auth none
@@ -49,7 +49,7 @@ startPlaygroundProxy() {
     echo "Starting playground proxy..."
     if [[ $ACTIVE_PLAYGROUND_PROXY == "" ]] ; 
         then 
-            docker-compose -f reverse-proxy/docker-compose.yml up --build -d
+            docker-compose -f src/reverse-proxy/docker-compose.yml up --build -d
         else
             echo '> Playground proxy already active!'
     fi
