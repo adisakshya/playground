@@ -1,8 +1,0 @@
-## Version 1.0.0
-
-- Initial release
-
-**Features**
-- Run from anywhere
-- Code Server and Docker preinstalled
-- Nginx reverse-proxy using SSL
