@@ -1,6 +1,6 @@
 # Playground
 
-[![version](https://img.shields.io/badge/Version-1.0.0-blue.svg?style=for-the-badge&logo=appveyor)](https://github.com/adisakshya/playground) [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-blue.svg?style=for-the-badge&logo=appveyor)](https://github.com/adisakshya/playground/pulls) [![Open Source](https://img.shields.io/badge/Open%20Source-Love-red.svg?style=for-the-badge&logo=appveyor)]()
+[![version](https://img.shields.io/badge/Version-1.0.0-blue.svg?style=for-the-badge&logo=appveyor)](https://github.com/adisakshya/playground) [![Dockerhub](https://img.shields.io/badge/Dockerhub-blue.svg?style=for-the-badge&logo=appveyor)](https://hub.docker.com/r/adisakshya/playground) [![Build Status](https://img.shields.io/travis/73VW/TechnicalReport.svg?style=for-the-badge&label=Build)](https://travis-ci.org/adisakshya/playground) [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-blue.svg?style=for-the-badge&logo=appveyor)](https://github.com/adisakshya/playground/pulls) [![Open Source](https://img.shields.io/badge/Open%20Source-Love-red.svg?style=for-the-badge&logo=appveyor)]()
 
 A development environment where you can run, test, and live debug code running within a container.
 
@@ -13,7 +13,8 @@ A development environment where you can run, test, and live debug code running w
 
 ### Download
 
-- ```comming soon...```
+- Download the latest release from [here](https://github.com/adisakshya/playground/releases/tag/v1.0.0)
+- Or fork/clone the repository following these [instructions](https://github.com/adisakshya/playground#forkclone)
 
 ### Usage
 
