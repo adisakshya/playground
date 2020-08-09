@@ -8,6 +8,7 @@ PLAYGROUND_HOST=192.168.99.100
 ACTIVE_PLAYGROUND_NETWORK=$(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}")
 ACTIVE_PLAYGROUND=$(docker ps -f "name=${PLAYGROUND_NAME}" --format '{{.Names}}')
 ACTIVE_PLAYGROUND_PROXY=$(docker ps -f "name=${PROXY_NAME}" --format '{{.Names}}')
+BASE_WORKDIR_PATH_ARG=$2
 
 # Create network
 createPlaygroundNetwork() {
@@ -34,7 +35,7 @@ startPlayground() {
                 -p 8080:8080 \
                 -v "$(which docker)://usr/bin/docker" \
                 -v "//var/run/docker.sock://var/run/docker.sock:rw" \
-                -v "//projects://home/player/projects" \
+                -v "${BASE_WORKDIR_PATH_ARG}://home/player/projects/DSA" \
                 -u $(id -u):$(id -g) \
                 adisakshya/playground \
                 --auth none
