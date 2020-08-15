@@ -1,7 +1,9 @@
+# Dockerfile
+
 FROM debian:stable-slim
 
 # Version
-ENV PLAYGROUND_VERSION 1.0.0
+ENV SLIM_PLAYGROUND_VERSION 1.0.0
 
 # Username
 ARG username='player'
@@ -43,23 +45,6 @@ RUN adduser --gecos '' --disabled-password ${username} && \
 
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
-
-# Install docker 
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/debian \
-    $(lsb_release -cs) \
-    stable" && \
-    apt-get update -qq && \
-    apt-get install docker-ce -y && \
-    usermod -aG docker ${username} && \ 
-    rm -rf /var/lib/apt/lists/*
-
-# Install NodeJS
-ENV NODE_VERSION 12
-RUN curl -sL -o- https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash && \
-    apt install nodejs -y && \
-    rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 8080
