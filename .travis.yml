@@ -4,44 +4,47 @@ node_js:
 
 services:
   - docker
-
-branches:
-  only:
-    - master
-
-env:
-  global:
-    - IMAGE_NAME=$DOCKER_USER/playground
       
 before_script:
-  # Get version information
-  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' src/Dockerfile)"
-  # Confirm presence of docler
+  # Get version information about playground
+  - SLIM_VERSION="$(awk '$2 == "SLIM_PLAYGROUND_VERSION" { print $3; exit }' src/playground/slim/Dockerfile)"
+  - FULL_VERSION="$(awk '$2 == "FULL_PLAYGROUND_VERSION" { print $3; exit }' src/playground/full/Dockerfile)"
+  # Confirm presence of docker
   - docker info
-  # Pull latest playground docker image
-  - docker pull "$IMAGE_NAME" || true
   # Install docker-compose
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
-install:
-  - echo "install nothing!"
+env:
+  global:
+    - IMAGE_NAME=$DOCKER_USER/playground
 
 # Build playground and proxy
 script:
-  - docker build -t $IMAGE_NAME -f src/Dockerfile --cache-from $IMAGE_NAME .
+  - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
+  - docker build -t $IMAGE_NAME:$FULL_VERSION-full -f src/playground/full/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
   - docker-compose -f src/reverse-proxy/docker-compose.yml build
 
 # List all docker images
 after_script:
   - docker images
 
-# Push to playground docker image to dockerhub
-after_success:
+# Docker login
+before_deploy:
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
-  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
-  - docker push $IMAGE_NAME:latest
-  - docker push $IMAGE_NAME:$VERSION
+
+# Push to playground docker image to dockerhub
+deploy:
+  provider: script
+  script: 
+    - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:latest
+    - docker tag $IMAGE_NAME:$FULL_VERSION-slim $IMAGE_NAME:full
+    - docker push $IMAGE_NAME:latest
+    - docker push $IMAGE_NAME:$full
+    - docker push $IMAGE_NAME:$SLIM_VERSION-slim
+    - docker push $IMAGE_NAME:$FULL_VERSION-slim
+  on:
+    branch: master
+  
