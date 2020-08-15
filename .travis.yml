@@ -1,47 +1,71 @@
 language: node_js
 node_js:
-    - "12"
+  - "12"
 
 services:
   - docker
-
-branches:
-  only:
-    - master
-
-env:
-  global:
-    - IMAGE_NAME=$DOCKER_USER/playground
       
 before_script:
-  # Get version information
-  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' src/Dockerfile)"
-  # Confirm presence of docler
+  # Get version information about playground
+  - SLIM_VERSION="$(awk '$2 == "SLIM_PLAYGROUND_VERSION" { print $3; exit }' src/playground/slim/Dockerfile)"
+  - FULL_VERSION="$(awk '$2 == "FULL_PLAYGROUND_VERSION" { print $3; exit }' src/playground/full/Dockerfile)"
+  # Confirm presence of docker
   - docker info
-  # Pull latest playground docker image
-  - docker pull "$IMAGE_NAME" || true
   # Install docker-compose
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
-install:
-  - echo "install nothing!"
+env:
+  global:
+    - IMAGE_NAME=$DOCKER_USER/playground
 
-# Build playground and proxy
-script:
-  - docker build -t $IMAGE_NAME -f src/Dockerfile --cache-from $IMAGE_NAME .
-  - docker-compose -f src/reverse-proxy/docker-compose.yml build
+stages:
+  - name: build-prod
+    if: branch = master
+  - name: build-dev
+    if: branch = dev
+    
+jobs:
+  include:
+    - stage: build-prod
+      script:
+        - echo 'Building playground for production'
+        - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
+        - docker build -t $IMAGE_NAME:$FULL_VERSION-full -f src/playground/full/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker images
+        - echo 'Releasing playground for production'
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:latest
+        - docker tag $IMAGE_NAME:$FULL_VERSION-full $IMAGE_NAME:full
+        - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:dev-$SLIM_VERSION-slim
+        - docker tag $IMAGE_NAME:$FULL_VERSION-full $IMAGE_NAME:dev-$FULL_VERSION-full
+        - docker push $IMAGE_NAME:latest
+        - docker push $IMAGE_NAME:full
+        - docker push $IMAGE_NAME:$SLIM_VERSION-slim
+        - docker push $IMAGE_NAME:$FULL_VERSION-full
+        - echo 'Released playground to production'
+    - stage: build-dev
+      script:
+        - echo 'Building playground for development'
+        - docker build -t $IMAGE_NAME:dev-$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
+        - docker build -t $IMAGE_NAME:dev-$FULL_VERSION-full -f src/playground/full/Dockerfile --build-arg BASE_IMAGE_TAG=dev-$SLIM_VERSION-slim .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker images
+        - echo 'Releasing playground for development'
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        - docker push $IMAGE_NAME:dev-$SLIM_VERSION-slim
+        - docker push $IMAGE_NAME:dev-$FULL_VERSION-full
+        - echo 'Released playground to development'
 
-# List all docker images
-after_script:
-  - docker images
-
-# Push to playground docker image to dockerhub
-after_success:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
-  - docker tag $IMAGE_NAME $IMAGE_NAME:$VERSION
-  - docker push $IMAGE_NAME:latest
-  - docker push $IMAGE_NAME:$VERSION
+notifications:
+  email: false
+  slack: 
+    rooms:
+      secure: NUEZPr057gjDV7XEptWGigjHMgw0qYRKyQzmung5LXslVvXqYeuNQ+w5to8iCqLupxU+b5aKffQK+HNwog3pDmkUxCrTCPSTGmdK2MZ1BoAxzBO2gO+r6JYnsmw6oAmxRw/OD5XDNqWlrH2Zfr9xzXKafNC+EFWJC6JbDCoKb2FS9u/2upbsQRKmNAhanfO4p3sHsE+QWDTHDXDAKlphpcFOHdkTJ7vj3kyhutO1Pd5QtC9AcJaA/gsXxpKIKhWuQidzgnrCAgHhqVyO+KifCrfS/RVbPla2ED64/HGoNJZ8oucqc3hIGvbLLVSed1Cl7TvB1ozvbBDTgvt+sMA995URhNBtOWXuUEoInO+NZtMdG5V3cEdesFqOclxf8GVODgJPl97u96kVX6TtsrrkLTWXocIW9y1ZLpc9HpgFPjeJxTuRY0HitEtuLOPkb2tqT26lpLxSNMc/sC7/KVk8yX2hTOxPR39bitCANvB5BrsiEEiEpojrLGC5R+S0zV4GhaSde7rqsU7dkmbljMYWvPKohisVkdvbW8wkS/4k8ksuwbbz3YeopCim3VlUno8CSbOHSEY1HPJkqV+6FFRStIab3H5pdKB6S93hiWmQ5RrpHDYgyarB5OA/bugVHkMprUCSwUbA62jUoJeSsRZf+/Fi2nLcn94n/GRNycn7ok8=
+    template:
+      - "`%{repository_slug}` \n*%{result}* build (<%{build_url}|#%{build_number}>) by %{author} for commit (<%{compare_url}|%{commit}>) on branch `%{branch}`."
+      - "Duration: *%{duration}*"
+      - "Message: %{message}"
