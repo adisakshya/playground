@@ -31,14 +31,11 @@ script:
 after_script:
   - docker images
 
-# Docker login
-before_deploy:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-
 # Push to playground docker image to dockerhub
-deploy:
+deploy-prod:
   provider: script
   script: 
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
     - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:latest
     - docker tag $IMAGE_NAME:$FULL_VERSION-slim $IMAGE_NAME:full
     - docker push $IMAGE_NAME:latest
@@ -47,4 +44,14 @@ deploy:
     - docker push $IMAGE_NAME:$FULL_VERSION-slim
   on:
     branch: master
+
+# Push to dev playground docker image to dockerhub
+deploy-dev:
+  provider: script
+  script: 
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+    - docker push $IMAGE_NAME:dev-$SLIM_VERSION-slim
+    - docker push $IMAGE_NAME:dev-$FULL_VERSION-slim
+  on:
+    branch: update/playground-variants
   

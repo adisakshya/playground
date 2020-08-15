@@ -1,7 +1,7 @@
 # Dockerfile
 
-ARG BASE_IMAGE_TAG='v1.0.0-slim'
-FROM adisaksya/playground:BASE_IMAGE_VERSION
+ARG BASE_IMAGE_TAG='1.0.0-slim'
+FROM adisakshya/playground:${BASE_IMAGE_TAG}
 
 # Version
 ENV FULL_PLAYGROUND_VERSION 1.0.0
