@@ -55,5 +55,8 @@ USER ${username}
 # Define work-directory
 WORKDIR /home/${username}
 
+# Add additional installers
+COPY installers  /home/${username}/installers
+
 # Entrypoint
 ENTRYPOINT ["dumb-init", "fixuid", "-q", "/usr/bin/code-server", "--bind-addr", "0.0.0.0:8080", "."]
