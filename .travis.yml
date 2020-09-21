@@ -8,7 +8,7 @@ services:
 before_script:
   # Get version information about playground
   - SLIM_VERSION="$(awk '$2 == "SLIM_PLAYGROUND_VERSION" { print $3; exit }' src/playground/slim/Dockerfile)"
-  - FULL_VERSION="$(awk '$2 == "FULL_PLAYGROUND_VERSION" { print $3; exit }' src/playground/full/Dockerfile)"
+  - FULL_VERSION="$(awk '$2 == "DIND_PLAYGROUND_VERSION" { print $3; exit }' src/playground/dind/Dockerfile)"
   # Confirm presence of docker
   - docker info
   # Install docker-compose
@@ -33,31 +33,33 @@ jobs:
       script:
         - echo 'Building playground for production'
         - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
-        - docker build -t $IMAGE_NAME:$FULL_VERSION-full -f src/playground/full/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
+        - docker build -t $IMAGE_NAME:$FULL_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
         - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
         - docker images
         - echo 'Releasing playground for production'
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:latest
-        - docker tag $IMAGE_NAME:$FULL_VERSION-full $IMAGE_NAME:full
+        - docker tag $IMAGE_NAME:$FULL_VERSION-dind $IMAGE_NAME:full
         - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:dev-$SLIM_VERSION-slim
-        - docker tag $IMAGE_NAME:$FULL_VERSION-full $IMAGE_NAME:dev-$FULL_VERSION-full
+        - docker tag $IMAGE_NAME:$FULL_VERSION-dind $IMAGE_NAME:dev-$FULL_VERSION-dind
         - docker push $IMAGE_NAME:latest
         - docker push $IMAGE_NAME:full
         - docker push $IMAGE_NAME:$SLIM_VERSION-slim
-        - docker push $IMAGE_NAME:$FULL_VERSION-full
+        - docker push $IMAGE_NAME:$FULL_VERSION-dind
         - echo 'Released playground to production'
     - stage: build-dev
       script:
         - echo 'Building playground for development'
         - docker build -t $IMAGE_NAME:dev-$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
-        - docker build -t $IMAGE_NAME:dev-$FULL_VERSION-full -f src/playground/full/Dockerfile --build-arg BASE_IMAGE_TAG=dev-$SLIM_VERSION-slim .
+        - docker build -t $IMAGE_NAME:dev-$FULL_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=dev-$SLIM_VERSION-slim .
         - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
         - docker images
         - echo 'Releasing playground for development'
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker push $IMAGE_NAME:dev-$SLIM_VERSION-slim
-        - docker push $IMAGE_NAME:dev-$FULL_VERSION-full
+        - docker push $IMAGE_NAME:dev-$FULL_VERSION-dind
         - echo 'Released playground to development'
 
 notifications:
