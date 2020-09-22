@@ -12,8 +12,7 @@ ARG username='player'
 USER root
 
 # Apt cache
-ENV DOCKER_HOST_IP '192.168.99.100'
-RUN  echo 'Acquire::http { Proxy "http://${DOCKER_HOST_IP}:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+RUN echo 'Acquire::http { Proxy "http://192.168.99.100:3142"; };' >> /etc/apt/apt.conf.d/01proxy
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends --no-upgrade -y \
