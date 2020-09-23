@@ -1,13 +1,16 @@
 #!/bin/bash 
 # Handle dind playground
 
+# Extract slim playground version
+SLIM_PLAYGROUND_VERSION="$(awk '$2 == "SLIM_PLAYGROUND_VERSION" { print $3; exit }' src/playground/slim/Dockerfile)"
+
 # Command line argument
 ARG=$1
 
 # Handle command line argument
 case ${ARG} in
     # Build playground
-    -b|--build) docker-compose -f src/playground/docker-compose.yml build playground-dind
+    -b|--build) docker-compose -f src/playground/docker-compose.yml build --build-arg SLIM_BASE_IMAGE_TAG="$SLIM_PLAYGROUND_VERSION-slim" playground-dind
     ;;
     # Start playground
     -u|--up) docker-compose -f src/playground/docker-compose.yml up playground-dind

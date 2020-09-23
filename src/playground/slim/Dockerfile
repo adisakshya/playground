@@ -14,7 +14,7 @@ USER root
 # Apt cache
 ARG apt_cache_proxy_host='localhost'
 ARG apt_cache_proxy_port='3142'
-COPY scripts/detect_proxy.sh .
+COPY detect_proxy.sh .
 RUN bash detect_proxy.sh ${apt_cache_proxy_host} ${apt_cache_proxy_port}
 
 # Install packages

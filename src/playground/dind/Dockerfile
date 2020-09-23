@@ -1,7 +1,7 @@
 # Dockerfile
 
-ARG BASE_IMAGE_TAG='1.1.0-slim'
-FROM adisakshya/playground:${BASE_IMAGE_TAG}
+ARG SLIM_BASE_IMAGE_TAG='1.1.0-slim'
+FROM adisakshya/playground:${SLIM_BASE_IMAGE_TAG}
 
 # Version
 ENV DIND_PLAYGROUND_VERSION 1.1.0
@@ -15,7 +15,7 @@ USER root
 # Apt cache
 ARG apt_cache_proxy_host='localhost'
 ARG apt_cache_proxy_port='3142'
-COPY scripts/detect_proxy.sh .
+COPY detect_proxy.sh .
 RUN bash detect_proxy.sh ${apt_cache_proxy_host} ${apt_cache_proxy_port}
 
 # Install docker 

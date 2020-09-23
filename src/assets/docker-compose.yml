@@ -29,6 +29,6 @@ volumes:
     apt-cacher-ng:
     
 networks:
-    playgroundNetwork:
+    playground-network:
         external:
             name: playground-network

@@ -16,6 +16,9 @@ before_script:
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  # Permissions for using play utility
+  - sudo chmod +x play.sh
+  - sudo chmod -R +x scripts/play
 
 env:
   global:
@@ -33,18 +36,19 @@ jobs:
   include:
     - stage: build-prod
       script:
-        - echo 'Building playground for production'
-        - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
-        - docker build -t $IMAGE_NAME:$DIND_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
-        - docker-compose -f src/reverse-proxy/docker-compose.yml build
-        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
+        - echo 'Initializing playground'
+        - bash play.sh --init
+        - echo 'Building playground assets'
+        - bash play.sh --assets --build
+        - echo 'Building slim-playground'
+        - bash play.sh --slim --build
+        - echo 'Building dind-playground'
+        - bash play.sh --dind --build
         - docker images
         - echo 'Releasing playground for production'
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:latest
         - docker tag $IMAGE_NAME:$DIND_VERSION-dind $IMAGE_NAME:dind
-        - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:dev-$SLIM_VERSION-slim
-        - docker tag $IMAGE_NAME:$DIND_VERSION-dind $IMAGE_NAME:dev-$DIND_VERSION-dind
         - docker push $IMAGE_NAME:latest
         - docker push $IMAGE_NAME:dind
         - docker push $IMAGE_NAME:$SLIM_VERSION-slim
@@ -52,11 +56,14 @@ jobs:
         - echo 'Released playground to production'
     - stage: build-dev
       script:
-        - echo 'Building playground for development'
-        - docker build -t $IMAGE_NAME:dev-$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
-        - docker build -t $IMAGE_NAME:dev-$DIND_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=dev-$SLIM_VERSION-slim .
-        - docker-compose -f src/reverse-proxy/docker-compose.yml build
-        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
+        - echo 'Initializing playground'
+        - bash play.sh --init
+        - echo 'Building playground assets'
+        - bash play.sh --assets --build
+        - echo 'Building slim-playground'
+        - bash play.sh --slim --build
+        - echo 'Building dind-playground'
+        - bash play.sh --dind --build
         - docker images
         - echo 'Releasing playground for development'
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
@@ -65,11 +72,14 @@ jobs:
         - echo 'Released playground to development'
     - stage: build
       script:
-        - echo 'Building playground'
-        - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
-        - docker build -t $IMAGE_NAME:$DIND_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
-        - docker-compose -f src/reverse-proxy/docker-compose.yml build
-        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
+        - echo 'Initializing playground'
+        - bash play.sh --init
+        - echo 'Building playground assets'
+        - bash play.sh --assets --build
+        - echo 'Building slim-playground'
+        - bash play.sh --slim --build
+        - echo 'Building dind-playground'
+        - bash play.sh --dind --build
         - docker images
 
 notifications:
