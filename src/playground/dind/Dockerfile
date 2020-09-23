@@ -29,5 +29,8 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     usermod -aG docker ${username} && \ 
     rm -rf /var/lib/apt/lists/*
 
+# Install vs-code docker extension
+RUN code-server --install-extension ms-azuretools.vscode-docker
+
 # Become player
 USER ${username}
