@@ -1,18 +1,10 @@
 #!/bin/bash
 
-# Variables
-PLAYGROUND_NAME=playground
-NETWORK_NAME=playgroundNetwork
-PROXY_NAME=proxyPlayground
-PLAYGROUND_HOST=192.168.99.100
-ACTIVE_PLAYGROUND_NETWORK=$(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}")
-ACTIVE_PLAYGROUND=$(docker ps -f "name=${PLAYGROUND_NAME}" --format '{{.Names}}')
-ACTIVE_PLAYGROUND_PROXY=$(docker ps -f "name=${PROXY_NAME}" --format '{{.Names}}')
-BASE_WORKDIR_PATH_ARG=$2
-
 # Create network
-createPlaygroundNetwork() {
-    echo "Creating network for playground..."
+create_playground_network() {
+    echo "> Creating network for playground..."
+    NETWORK_NAME='playground-network'
+    ACTIVE_PLAYGROUND_NETWORK=$(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}")
     if [[ $ACTIVE_PLAYGROUND_NETWORK == "" ]] ; 
         then 
             docker network create --driver bridge ${NETWORK_NAME}
@@ -21,44 +13,63 @@ createPlaygroundNetwork() {
     fi
 }
 
-# Start playground
-startPlayground() {
-    echo "Starting playground..."
-    if [[ $ACTIVE_PLAYGROUND == "" ]] ; 
+# Initialize playground
+init() {
+    # Create playground-network
+    create_playground_network
+    # Set environment variables
+    echo '> Setting environment variables'
+    source scripts/env.sh
+    # Remove previously existing docker-compose yml if any
+    echo '> Removing previously existing configuration for playground'
+    rm -rf src/playground/docker-compose.yml;
+    # Generate new docker-compose.yml for playground
+    # from template and environment variables
+    echo '> Creating new configuration for playground'
+    envsubst < "src/playground/template.yml" > "src/playground/docker-compose.yml";
+    echo '> Initialization completed'
+}
+
+# Start slim-playground
+slim_playground() {
+    echo "> Slim playground..."
+    SLIM_OPTION=$1
+    if [[ $SLIM_OPTION != "" ]] ; 
         then 
-            docker run \
-                -d \
-                --network ${NETWORK_NAME} \
-                --hostname ${PLAYGROUND_NAME} \
-                --name ${PLAYGROUND_NAME} \
-                --restart on-failure \
-                -p 8080:8080 \
-                -v "$(which docker)://usr/bin/docker" \
-                -v "//var/run/docker.sock://var/run/docker.sock:rw" \
-                -v "${BASE_WORKDIR_PATH_ARG}://home/player/projects/DSA" \
-                -u $(id -u):$(id -g) \
-                adisakshya/playground \
-                --auth none
+            scripts/play/slim.sh $SLIM_OPTION
         else
-            echo '> Playground is already active!'
+            echo '> Missing option for slim-playground command'
     fi
 }
 
-# Start reverse-proxy
-startPlaygroundProxy() {
-    # Start proxy
-    echo "Starting playground proxy..."
-    if [[ $ACTIVE_PLAYGROUND_PROXY == "" ]] ; 
+# Start dind-playground
+dind_playground() {
+    echo "> Dind playground..."
+    DIND_OPTION=$1
+    if [[ $DIND_OPTION != "" ]] ; 
         then 
-            docker-compose -f src/reverse-proxy/docker-compose.yml up --build -d
+            scripts/play/dind.sh $DIND_OPTION
         else
-            echo '> Playground proxy already active!'
+            echo '> Missing option for dind-playground command'
+    fi
+}
+
+# Handle playground assets
+assets() {
+    echo "> Playground assets..."
+    ASSET_OPTION=$1
+    if [[ $ASSET_OPTION != "" ]] ; 
+        then 
+            scripts/play/assets.sh $ASSET_OPTION
+        else
+            echo '> Missing option for assets command'
     fi
 }
 
 # Test playground
 test() {
-    echo 'Testing playground...'
+    echo '> Testing playground...'
+    PLAYGROUND_HOST='192.168.99.100'
     status=$(curl -s --head -w %{http_code} ${PLAYGROUND_HOST} -o /dev/null)
     if [ ${status} == 301 ] ; 
         then
@@ -69,35 +80,23 @@ test() {
     fi;
 }
 
-# Play
-play() {
-    # Establish playground network
-    createPlaygroundNetwork
-    
-    # Start playground
-    startPlayground
-    
-    # Start playground proxy
-    startPlaygroundProxy
-
-    # Test
-    test
-}
-
 # Usage
 usage() {
-    # Show usage
-    echo '> Usage play [-p | --play] [-t | --test] [-h | --help]'
+    echo '> Usage play [-i | --init] [-a | --assets] [-d | --dind] [-s | --slim] [-t | --test] [-h | --help]'
 }
 
 # Handle command line arguments
 ARG=$1
 case ${ARG} in
-    -p|--play) play
+    -i|--init) init
+    ;;
+    -a|--assets) assets $2
+    ;;
+    -d|--dind) dind_playground $2
+    ;;
+    -s|--slim) slim_playground $2
     ;;
     -t|--test) test
-    ;;
-    -h|--help) usage
     ;;
     *) usage
     ;;

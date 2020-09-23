@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+export DOCKER=$(which docker)
+export APT_CACHE_PROXY_HOST=192.168.99.100
+export APT_CACHE_PROXY_PORT=3142
+export PLAYGROUND_SLIM_PORT=8080
+export PLAYGROUND_DIND_PORT=8081
+export PLAYGOUND_PLAYER_UID=$(id -u)
+export PLAYGOUND_PLAYER_GID=$(id -g)
