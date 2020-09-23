@@ -13,15 +13,15 @@ ARG username='player'
 USER root
 
 # Apt cache
-RUN echo 'Acquire::http { Proxy "http://192.168.99.100:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+ARG apt_cache_proxy_host='localhost'
+ARG apt_cache_proxy_port='3142'
+COPY scripts/detect_proxy.sh .
+RUN bash detect_proxy.sh ${apt_cache_proxy_host} ${apt_cache_proxy_port}
 
 # Install docker 
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     add-apt-repository \
-    # using apt-cacher-ng together with https
-    # this uses an http connection between playground and apt-cacher-ng,
-    # but tells apt-cacher-ng to use an https connection to the server
-    "deb [arch=amd64] http://HTTPS///download.docker.com/linux/debian \
+    "deb [arch=amd64] http://download.docker.com/linux/debian \
     $(lsb_release -cs) \
     stable" && \
     apt-get update -qq && \

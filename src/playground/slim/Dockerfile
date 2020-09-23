@@ -12,7 +12,10 @@ ARG username='player'
 USER root
 
 # Apt cache
-RUN echo 'Acquire::http { Proxy "http://192.168.99.100:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+ARG apt_cache_proxy_host='localhost'
+ARG apt_cache_proxy_port='3142'
+COPY scripts/detect_proxy.sh .
+RUN bash detect_proxy.sh ${apt_cache_proxy_host} ${apt_cache_proxy_port}
 
 # Install packages
 RUN apt-get update && apt-get install --no-install-recommends --no-upgrade -y \

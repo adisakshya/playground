@@ -3,7 +3,7 @@ version: '3'
 
 services:
     apt-cacher-ng:
-        image: apt-cacher
+        build: ./apt-cacher-ng
         container_name: apt-cacher-ng
         ports:
             - "3142:3142"
