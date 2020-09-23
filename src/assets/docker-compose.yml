@@ -1,0 +1,34 @@
+# Playground Assets
+
+version: '3.7'
+
+services:
+    
+    # Apt Cacher
+    apt-cacher-ng:
+        build: apt-cache/apt-cacher-ng
+        container_name: playground-apt-cacher-ng
+        ports:
+            - "3142:3142"
+        volumes:
+            - apt-cacher-ng://var/cache/apt-cacher-ng
+        restart: on-failure
+    
+    # Reverse Proxy
+    reverse-proxy:
+        build: reverse-proxy/nginx
+        networks: 
+            - playground-network
+        container_name: playground-proxy
+        ports:
+            - '80:80'
+            - '443:443'
+        restart: on-failure
+    
+volumes:
+    apt-cacher-ng:
+    
+networks:
+    playgroundNetwork:
+        external:
+            name: playground-network
