@@ -23,9 +23,11 @@ env:
 
 stages:
   - name: build-prod
-    if: branch = master
+    if: branch = master AND type = push AND fork = false
   - name: build-dev
-    if: branch = dev
+    if: branch = dev AND type = push AND fork = false
+  - name: build
+    if: branch != master AND branch != dev
     
 jobs:
   include:
@@ -61,6 +63,14 @@ jobs:
         - docker push $IMAGE_NAME:dev-$SLIM_VERSION-slim
         - docker push $IMAGE_NAME:dev-$DIND_VERSION-dind
         - echo 'Released playground to development'
+    - stage: build
+      script:
+        - echo 'Building playground'
+        - docker build -t $IMAGE_NAME:$SLIM_VERSION-slim -f src/playground/slim/Dockerfile .
+        - docker build -t $IMAGE_NAME:$DIND_VERSION-dind -f src/playground/dind/Dockerfile --build-arg BASE_IMAGE_TAG=$SLIM_VERSION-slim .
+        - docker-compose -f src/reverse-proxy/docker-compose.yml build
+        - docker-compose -f src/apt-cache-ng/docker-compose.yml build
+        - docker images
 
 notifications:
   email: false
