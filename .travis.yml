@@ -67,6 +67,8 @@ jobs:
         - docker images
         - echo 'Releasing playground for development'
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        - docker tag $IMAGE_NAME:$SLIM_VERSION-slim $IMAGE_NAME:dev-$SLIM_VERSION-slim
+        - docker tag $IMAGE_NAME:$DIND_VERSION-dind $IMAGE_NAME:dev-$DIND_VERSION-dind
         - docker push $IMAGE_NAME:dev-$SLIM_VERSION-slim
         - docker push $IMAGE_NAME:dev-$DIND_VERSION-dind
         - echo 'Released playground to development'
