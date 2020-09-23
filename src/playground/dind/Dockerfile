@@ -4,7 +4,7 @@ ARG SLIM_BASE_IMAGE_TAG='1.1.0-slim'
 FROM adisakshya/playground:${SLIM_BASE_IMAGE_TAG}
 
 # Version
-ENV DIND_PLAYGROUND_VERSION 1.1.0
+ENV DIND_PLAYGROUND_VERSION 1.0.0
 
 # Username
 ARG username='player'
