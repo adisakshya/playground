@@ -1,0 +1,36 @@
+# Playground
+
+version: '3.7'
+ 
+services:
+
+    # Slim Playground
+    playground-slim:
+        build: slim
+        hostname: playground
+        container_name: playground
+        networks:
+          - playgroundNetwork
+        ports:
+            - $PLAYGROUND_SLIM_PORT:8080
+        restart: on-failure
+    
+    # Dind Playground
+    playground-dind:
+        build: dind
+        hostname: playground-dind
+        container_name: playground-dind
+        networks:
+          - playground-network
+        ports:
+            - $PLAYGROUND_DIND_PORT:8080
+        volumes: 
+            - $DOCKER://usr/bin/docker
+            - //var/run/docker.sock://var/run/docker.sock:rw
+        user: $PLAYGOUND_PLAYER_UID:$PLAYGOUND_PLAYER_GID
+        restart: on-failure
+
+networks:
+    playgroundNetwork:
+        external:
+            name: playground-network
