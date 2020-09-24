@@ -66,6 +66,12 @@ assets() {
     fi
 }
 
+# Handle playground exits
+clean() {
+    echo "> Exiting from playground..."
+    scripts/play/kill.sh
+}
+
 # Test playground
 test() {
     echo '> Testing playground...'
@@ -95,6 +101,8 @@ case ${ARG} in
     -d|--dind) dind_playground $2
     ;;
     -s|--slim) slim_playground $2
+    ;;
+    -c|--clean) clean
     ;;
     -t|--test) test
     ;;

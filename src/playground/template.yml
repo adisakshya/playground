@@ -6,30 +6,38 @@ services:
 
     # Slim Playground
     playground-slim:
-        build: slim
-        image: adisakshya/playground:$SLIM_PLAYGROUND_VERSION-slim
+        build:
+            context: slim
+            args:
+                - apt_cache_proxy_host=${APT_CACHE_PROXY_HOST}
+                - apt_cache_proxy_port=${APT_CACHE_PROXY_PORT}
+        image: adisakshya/playground:${SLIM_PLAYGROUND_VERSION}-slim
         hostname: playground
         container_name: playground
         networks:
           - playground-network
         ports:
-            - $PLAYGROUND_SLIM_PORT:8080
+            - ${PLAYGROUND_SLIM_PORT}:8080
         restart: on-failure
     
     # Dind Playground
     playground-dind:
-        build: dind
-        image: adisakshya/playground:$DIND_PLAYGROUND_VERSION-dind
+        build:
+            context: dind
+            args:
+                - apt_cache_proxy_host=${APT_CACHE_PROXY_HOST}
+                - apt_cache_proxy_port=${APT_CACHE_PROXY_PORT}
+        image: adisakshya/playground:${DIND_PLAYGROUND_VERSION}-dind
         hostname: playground-dind
         container_name: playground-dind
         networks:
-          - playground-network
+            - playground-network
         ports:
-            - $PLAYGROUND_DIND_PORT:8080
+            - ${PLAYGROUND_DIND_PORT}:8080
         volumes: 
-            - $DOCKER://usr/bin/docker
+            - ${DOCKER}://usr/bin/docker
             - //var/run/docker.sock://var/run/docker.sock:rw
-        user: $PLAYGOUND_PLAYER_UID:$PLAYGOUND_PLAYER_GID
+        user: ${PLAYGOUND_PLAYER_UID}:${PLAYGOUND_PLAYER_GID}
         restart: on-failure
 
 networks:
