@@ -1,7 +1,5 @@
 # Contributing
 
-Please note that this project is released with a [Code of Conduct](https://github.com/adisakshya/playground/blob/master/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
-
 ## How can I contribute?
 
 ### Submit an issue
@@ -12,14 +10,12 @@ Please search existing issues to avoid creating duplicates.
 
 ### Improve issues
 
-Some issues are created with missing information ([`needs more info`](https://github.com/adisakshya/playground/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22+label%3A%22needs+more+info%22)), are not reproducible, or are plain duplicates. Help us finding reproducible steps and closing duplicates.
+Some issues are created with missing information ([`needs more info`](https://github.com/adisakshya/playground/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22+label%3A%22needs+more+info%22)), are not reproducible, or are plain duplicates. You can help in finding reproducible steps and closing duplicates.
 
 ### Comment on issues
 
-We are always looking for more opinions, leaving a comment in the issue tracker is a good opportunity to influence the future direction of Notable.
-
-We also consider the number of ":+1:" an issue has when deciding if we are going to work on it in the [Next milestone](https://github.com/adisakshya/playground/milestones) or not, so be sure to add your ":+1:" to the issues you're most interested in.
+Always looking for more opinions, leaving a comment in the issue tracker is a good opportunity to influence the future direction of Playground.
 
 ### Submit a pull request
 
-All versions of the app are open-source, you can fork the repository and modify it, and submit it as a PR or you might want to do that to experiment with radical new ideas.
+All versions of the project are open-source, you can fork the repository and modify it, and submit it as a PR or you might want to do that to experiment with radical new ideas.
