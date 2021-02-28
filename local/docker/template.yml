@@ -1,0 +1,20 @@
+# Playground
+
+version: '3.7'
+ 
+services:
+
+    # Playground
+    playground:
+        # Uncomment build configuration option
+        # to build playground docker-image named adisakshya/playground with tag ${PLAYGROUND_VERSION}
+        build:
+            context: playground
+        image: adisakshya/playground:${PLAYGROUND_VERSION}
+        hostname: playground
+        ports:
+            - ${PLAYGROUND_PORT}:8080
+        volumes: 
+            - //var/run/docker.sock://var/run/docker.sock:rw
+        user: ${PLAYGOUND_PLAYER_UID}:${PLAYGOUND_PLAYER_GID}
+        restart: on-failure
