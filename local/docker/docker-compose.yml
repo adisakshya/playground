@@ -1,0 +1,16 @@
+# Playground docker-compose template
+
+version: '3.7'
+
+services:
+    playground:
+        image: adisakshya/playground
+        hostname: playground
+        ports:
+            - 8000-8080:8000-8080
+        volumes: 
+            - //var/run/docker.sock://var/run/docker.sock:rw
+        # Replace UID with user-id => $(id -u)
+        # and GID with group-id => $(id -g)
+        user: ${UID}:${GID}
+        restart: on-failure
