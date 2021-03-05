@@ -35,11 +35,7 @@ jobs:
       name: Docker Image
       script:
         # Run playground docker-image
-        - docker run -d \
-            -u $(id -u):$(id -g) \
-            -v //var/run/docker.sock://var/run/docker.sock:rw \
-            -p 8001-8080:8001-8080 \
-            adisakshya/playground
+        - docker run -d -u $(id -u):$(id -g) -v //var/run/docker.sock://var/run/docker.sock:rw -p 8001-8080:8001-8080 adisakshya/playground
         # Try reaching code-server
         - curl localhost:8080
         # List all docker containers
