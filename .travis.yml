@@ -1,0 +1,52 @@
+language: python
+
+services:
+  - docker
+
+env:
+  global:
+    - IMAGE_NAME=playground
+
+stages:
+  - build
+  - test
+
+install:
+  # Install docker-compose
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
+before_script:
+  # Confirm presence of docler
+  - docker info
+
+jobs:
+  include:
+    - stage: build
+      name: Build
+      script:
+        # Build playground docker-image
+        - docker build -t $DOCKER_USER/$IMAGE_NAME -f local/docker/Dockerfile .
+        # List docker images
+        - docker images
+    - stage: test
+      name: Docker Image
+      script:
+        # Run playground docker-image
+        - docker run -d \
+            -u $(id -u):$(id -g) \
+            -v //var/run/docker.sock://var/run/docker.sock:rw \
+            -p 8001-8080:8001-8080 \
+            adisakshya/playground
+        # Try reaching code-server
+        - curl localhost:8080
+        # List all docker containers
+        - docker ps -a
+    - stage: test
+      name: Install Scripts
+      # Run install scripts in docker container
+      script:
+        - docker exec ubuntu local/shell/debian.sh
+        - docker exec amazon-linux local/shell/amazon-linux.sh
