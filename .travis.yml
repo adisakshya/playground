@@ -44,5 +44,5 @@ jobs:
       name: Install Scripts
       # Run install scripts in docker container
       script:
-        - docker exec ubuntu local/shell/debian.sh
-        - docker exec amazon-linux local/shell/amazon-linux.sh
+        - docker run --rm -v $(pwd)/local/shell/debian.sh:/playground/debian.sh ubuntu bash /playground/debian.sh
+        - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazon-linux bash /playground/amazon-linux.sh
