@@ -6,16 +6,15 @@
 ###############################################
 
 # Install required packages and tools
-apt-get update -y
-apt-get install --no-install-recommends --no-upgrade -y \
+sudo apt-get update -y
+sudo apt-get install -y \
     build-essential \
     bash \
     curl \
     nano \
     openssh-server \
     software-properties-common \
-    wget && \
-    rm -rf /var/lib/apt/lists/*
+    wget
 
 # Install code-server
 curl -fsSL https://code-server.dev/install.sh | sh
