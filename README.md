@@ -64,6 +64,8 @@ SSH Connection             | CPU Architecture Information
 
 # Local Playground
 
+[![Build Status](https://travis-ci.com/adisakshya/playground.svg?branch=master)](https://travis-ci.com/adisakshya/playground)
+
 - Setup your minimal customized local development environment.
 - Preserve battery life when you're on the go.
 
