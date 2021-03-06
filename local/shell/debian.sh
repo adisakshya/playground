@@ -5,12 +5,6 @@
 #  minimal development-environment on Debian  #
 ###############################################
 
-# Environment Variables
-export TZ=Asia/Kolkata
-
-# Set timezone
-sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
 # Install required packages and tools
 apt-get update -y
 apt-get install --no-install-recommends --no-upgrade -y \
