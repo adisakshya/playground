@@ -1,0 +1,68 @@
+language: python
+
+services:
+  - docker
+
+env:
+  global:
+    - IMAGE_NAME=playground
+
+stages:
+  - build
+  - test
+  - name: deploy
+    if: branch = master AND type = push AND fork = false
+
+install:
+  - echo 'Nothing to install right now...'
+
+before_script:
+  # Confirm presence of docler
+  - docker info
+  # Versioning - Local Playground
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' local/docker/Dockerfile)"
+
+jobs:
+  include:
+    - stage: build
+      name: Build
+      script:
+        # Build playground docker-image
+        - docker build -t $DOCKER_USER/$IMAGE_NAME -f local/docker/Dockerfile .
+        # List docker images
+        - docker images
+    - stage: test
+      name: Docker Image
+      script:
+        # Run playground docker-image
+        - docker run -d -u $(id -u):$(id -g) -v //var/run/docker.sock://var/run/docker.sock:rw -p 8001-8080:8001-8080 adisakshya/playground
+        # Sleep for 15 seconds
+        - sleep 15
+        # Try reaching code-server
+        - curl localhost:8080/login
+        # List all docker containers
+        - docker ps -a
+    - stage: test
+      name: Install Script - Debian
+      script:
+        # Run debian install script
+        - bash $(pwd)/local/shell/debian.sh
+    - stage: test
+      name: Install Script - Amazon Linux
+      script:
+        # Run amazon-linux install script in docker-container
+        - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazonlinux bash /playground/amazon-linux.sh
+    - stage: deploy
+      name: Push docker-image to Docker Hub
+      script:
+        # Docker login
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        # Version Tag
+        - docker tag $DOCKER_USER/$IMAGE_NAME:latest $DOCKER_USER/$IMAGE_NAME:$VERSION
+        # Push version taged image
+        - docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
+        # Push latest taged image
+        - docker push $DOCKER_USER/$IMAGE_NAME:latest
+
+notifications:
+  email: false

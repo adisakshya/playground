@@ -6,11 +6,11 @@
 #####################################################
 
 # Install required packages and tools
-sudo yum update -y
-sudo yum install -y \
+yum update -y
+yum install -y \
     curl \
     nano \
-    openssh \
+    openssh-server \
     wget
 
 # Install code-server

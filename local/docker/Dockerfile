@@ -2,6 +2,9 @@
 
 FROM debian:stable-slim
 
+# Playground Version
+ENV PLAYGROUND_VERSION 1.0.0
+
 # Username
 ARG username='player'
 
