@@ -63,3 +63,6 @@ jobs:
         - docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
         # Push latest taged image
         - docker push $DOCKER_USER/$IMAGE_NAME:latest
+
+notifications:
+  email: false
