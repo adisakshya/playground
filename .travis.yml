@@ -10,6 +10,8 @@ env:
 stages:
   - build
   - test
+  - name: deploy
+    if: branch = master AND type = push AND fork = false
 
 install:
   - echo 'Nothing to install right now...'
@@ -27,9 +29,6 @@ jobs:
         - docker build -t $DOCKER_USER/$IMAGE_NAME -f local/docker/Dockerfile .
         # List docker images
         - docker images
-        # INITIAL PUSH docker image to dockerhub
-        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-        - docker push $DOCKER_USER/$IMAGE_NAME:latest
     - stage: test
       name: Docker Image
       script:
@@ -49,3 +48,10 @@ jobs:
       script:
         # Run amazon-linux install script in docker-container
         - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazonlinux bash /playground/amazon-linux.sh
+    - stage: deploy
+      name: Push docker-image to Docker Hub
+      script:
+        # Docker login
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        # Docker push
+        - docker push $DOCKER_USER/$IMAGE_NAME:latest
