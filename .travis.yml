@@ -12,11 +12,7 @@ stages:
   - test
 
 install:
-  # Install docker-compose
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  - sudo apt-get update
-  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - echo 'Nothing to install right now...'
 
 before_script:
   # Confirm presence of docler
@@ -43,8 +39,10 @@ jobs:
     - stage: test
       name: Install Script - Debian
       script:
+        # Run debian install script
         - bash $(pwd)/local/shell/debian.sh
     - stage: test
       name: Install Script - Amazon Linux
       script:
+        # Run amazon-linux install script in docker-container
         - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazonlinux bash /playground/amazon-linux.sh
