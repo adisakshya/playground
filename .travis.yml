@@ -19,6 +19,8 @@ install:
 before_script:
   # Confirm presence of docler
   - docker info
+  # Versioning - Local Playground
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' Dockerfile)"
 
 jobs:
   include:
@@ -55,5 +57,9 @@ jobs:
       script:
         # Docker login
         - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-        # Docker push
+        # Version Tag
+        - docker tag $DOCKER_USER/$IMAGE_NAME:latest $DOCKER_USER/$IMAGE_NAME:$VERSION
+        # Push version taged image
+        - docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
+        # Push latest taged image
         - docker push $DOCKER_USER/$IMAGE_NAME:latest
