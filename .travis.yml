@@ -41,8 +41,10 @@ jobs:
         # List all docker containers
         - docker ps -a
     - stage: test
-      name: Install Scripts
-      # Run install scripts in docker container
+      name: Install Script - Debian
       script:
-        - docker run --rm -v $(pwd)/local/shell/debian.sh:/playground/debian.sh ubuntu bash /playground/debian.sh
-        - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazon-linux bash /playground/amazon-linux.sh
+        - bash $(pwd)/local/shell/debian.sh
+    - stage: test
+      name: Install Script - Amazon Linux
+      script:
+        - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazonlinux bash /playground/amazon-linux.sh
