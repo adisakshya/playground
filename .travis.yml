@@ -20,7 +20,7 @@ before_script:
   # Confirm presence of docler
   - docker info
   # Versioning - Local Playground
-  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' Dockerfile)"
+  - VERSION="$(awk '$2 == "PLAYGROUND_VERSION" { print $3; exit }' local/docker/Dockerfile)"
 
 jobs:
   include:
