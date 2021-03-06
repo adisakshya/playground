@@ -10,7 +10,7 @@ sudo yum update -y
 sudo yum install -y \
     curl \
     nano \
-    openssh \
+    openssh-server \
     wget
 
 # Install code-server

@@ -6,12 +6,13 @@
 ###############################################
 
 # Install required packages and tools
-apt-get update && apt-get install --no-install-recommends --no-upgrade -y \
+apt-get update -y
+apt-get install --no-install-recommends --no-upgrade -y \
     build-essential \
     bash \
     curl \
     nano \
-    openssh \
+    openssh-server \
     software-properties-common \
     wget && \
     rm -rf /var/lib/apt/lists/*
