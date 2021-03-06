@@ -9,7 +9,7 @@
 export TZ=Asia/Kolkata
 
 # Set timezone
-ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install required packages and tools
 apt-get update -y
