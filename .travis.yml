@@ -53,12 +53,14 @@ jobs:
         # Run amazon-linux install script in docker-container
         - docker run --rm -v $(pwd)/local/shell/amazon-linux.sh:/playground/amazon-linux.sh amazonlinux bash /playground/amazon-linux.sh
     - stage: deploy
-      name: Push docker-image to Docker Hub
+      name: Push docker image to Docker Hub
       script:
-        # Docker login
-        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+        # Build playground docker-image
+        - docker build -t $DOCKER_USER/$IMAGE_NAME -f local/docker/Dockerfile .
         # Version Tag
         - docker tag $DOCKER_USER/$IMAGE_NAME:latest $DOCKER_USER/$IMAGE_NAME:$VERSION
+        # Docker login
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         # Push version taged image
         - docker push $DOCKER_USER/$IMAGE_NAME:$VERSION
         # Push latest taged image
