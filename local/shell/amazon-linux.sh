@@ -11,7 +11,8 @@
 # reaches anything bash-only.
 if [ -z "${BASH_VERSION:-}" ]
 then
-    echo "ERROR: this script requires bash, but is running under $(ps -p $$ -o comm= 2>/dev/null || echo sh)." >&2
+    running_shell=$(ps -p $$ -o comm= 2>/dev/null)
+    echo "ERROR: this script requires bash, but is running under ${running_shell:-sh}." >&2
     echo "Re-run it with:" >&2
     echo "    curl -fsSL <url> | bash" >&2
     exit 1
