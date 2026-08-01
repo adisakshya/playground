@@ -93,11 +93,22 @@ Setup complete. Start the Web IDE with:
 
     code-server --bind-addr 127.0.0.1:8080
 
-then open http://127.0.0.1:8080 in a browser.
-
 A password was generated during installation and is stored in:
 
     ${HOME}/.config/code-server/config.yaml
+
+If you installed on THIS machine, open http://127.0.0.1:8080 in a browser.
+
+If you installed on a REMOTE host, that address is the loopback interface of
+the remote machine, so it will not resolve from your laptop. Forward the port
+over SSH instead, from your own machine:
+
+    ssh -L 8080:127.0.0.1:8080 <user>@<remote-host>
+
+and then open http://127.0.0.1:8080 locally. Prefer this over binding
+code-server to 0.0.0.0, which publishes the IDE on every interface - on a
+cloud VM that means the public internet, behind nothing but the password
+above.
 
 To run it in the background instead:
 

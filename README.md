@@ -77,11 +77,11 @@ There are two ways to setup the local development environment which can be acces
     1. Install scripts are included for the following platforms:
         - Debian and Windows (WSL)
             ```
-            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | bash
             ```
         - Amazon-Linux
             ```
-            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | bash
             ```
     2. Feel free to contribute an install script for any other platform like CentOS, MacOS, Arch Linux etc, that would setup the local development environment in a single command.
 - Using Docker [make sure you have docker installed]
