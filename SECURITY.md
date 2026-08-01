@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security issues privately through [GitHub's private vulnerability reporting](https://github.com/adisakshya/playground/security/advisories/new) rather than opening a public issue.
+Please report security issues privately rather than opening a public issue, through [GitHub's private vulnerability reporting](https://github.com/adisakshya/playground/security/advisories/new). If that page is unavailable, email **adisakshya98@gmail.com** instead — do not fall back to a public issue.
 
 Include what you were running (Colab notebook, install script, or container), what you observed, and how to reproduce it. Expect an initial response within a week.
 
