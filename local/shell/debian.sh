@@ -1,10 +1,23 @@
 #!/bin/bash
-set -euo pipefail
 
 ###############################################
 #  A shell script to setup your customised    #
 #  minimal development-environment on Debian  #
 ###############################################
+
+# This script needs bash: it uses arrays, and set -o pipefail. Piping it into
+# `sh` ignores the shebang, and /bin/sh is dash on Debian, so say so plainly
+# instead of failing on a syntax error. Deliberately POSIX-parseable, so it
+# runs before dash reaches anything bash-only.
+if [ -z "${BASH_VERSION:-}" ]
+then
+    echo "ERROR: this script requires bash, but is running under $(ps -p $$ -o comm= 2>/dev/null || echo sh)." >&2
+    echo "Re-run it with:" >&2
+    echo "    curl -fsSL <url> | bash" >&2
+    exit 1
+fi
+
+set -euo pipefail
 
 # Pinned deliberately. Installing whatever is newest means an upstream CLI
 # change reaches users unannounced - that is how the removal of code-server's
