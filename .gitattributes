@@ -7,4 +7,7 @@
 #     pip install nbdime
 #     nbdime config-git --enable --global
 #
-*.ipynb merge=nbdime diff=nbdime
+# The driver name must be jupyternotebook: that is what `nbdime config-git`
+# registers in .gitconfig. Naming an unregistered driver here makes git fall
+# back to a line-based merge silently, with no warning that it did so.
+*.ipynb merge=jupyternotebook diff=jupyternotebook

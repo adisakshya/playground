@@ -78,11 +78,11 @@ There are two ways to setup the local development environment which can be acces
     1. Install scripts are included for the following platforms:
         - Debian and Windows (WSL)
             ```
-            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | bash
             ```
         - Amazon-Linux
             ```
-            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | bash
             ```
     2. Feel free to contribute an install script for any other platform like CentOS, MacOS, Arch Linux etc, that would setup the local development environment in a single command.
 - Using Docker [make sure you have docker installed]
@@ -137,7 +137,13 @@ That is localtunnel's own interstitial, not an error. It expects your public IP 
 Check the code-server log before blaming the tunnel. If code-server exited during startup, the tunnel points at a port with nothing behind it.
 
 **`ssh` says `Permission denied` with the password I set.**
-Root login over SSH has to be enabled explicitly, and the daemon has to read that configuration before it starts. If you are running an older copy of the notebook, this did not work at all.
+Root login over SSH is disabled by default (`PermitRootLogin prohibit-password`), and sshd reads its configuration only at startup — so both `PermitRootLogin yes` and `PasswordAuthentication yes` have to be in effect *before* the daemon is launched. Check what sshd actually resolved, rather than what any one file asks for:
+
+```
+sshd -T | grep -E 'permitrootlogin|passwordauthentication'
+```
+
+If either value is wrong, fix the configuration and restart sshd. Note that a drop-in in `/etc/ssh/sshd_config.d/` which sorts earlier wins: sshd keeps the *first* value it obtains for a keyword, and cloud images commonly ship `60-cloudimg-settings.conf` with `PasswordAuthentication no`.
 
 **The Colab session disconnects while I'm working.**
 Colab enforces idle and maximum session limits. See [#9](https://github.com/adisakshya/playground/issues/9).
