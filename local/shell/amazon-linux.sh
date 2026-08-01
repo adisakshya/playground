@@ -1,20 +1,56 @@
 #!/bin/bash
+set -euo pipefail
 
 #####################################################
 #  A shell script to setup your customised          #
 #  minimal development-environment on Amazon Linux  #
 #####################################################
 
+# Pinned deliberately. Installing whatever is newest means an upstream CLI
+# change reaches users unannounced - that is how the removal of code-server's
+# --port flag broke the Colab notebook. Bump this once you have tested it.
+CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.118.0}"
+
+# Package management needs root. Escalate only when we are not already root,
+# so this works both for ec2-user and inside a root container.
+as_root() {
+    if [ "$(id -u)" -eq 0 ]
+    then
+        "$@"
+    elif command -v sudo > /dev/null 2>&1
+    then
+        sudo "$@"
+    else
+        echo "ERROR: this script needs root privileges and sudo is unavailable." >&2
+        exit 1
+    fi
+}
+
+# Amazon Linux 2023 ships dnf; Amazon Linux 2 ships yum
+if command -v dnf > /dev/null 2>&1
+then
+    PACKAGE_MANAGER="dnf"
+else
+    PACKAGE_MANAGER="yum"
+fi
+
 # Install required packages and tools
-yum update -y
-yum install -y \
-    curl \
+as_root "$PACKAGE_MANAGER" update -y
+
+# curl ships by default, and requesting it explicitly conflicts with
+# curl-minimal on Amazon Linux 2023, so only install it when genuinely absent
+if ! command -v curl > /dev/null 2>&1
+then
+    as_root "$PACKAGE_MANAGER" install -y curl
+fi
+
+as_root "$PACKAGE_MANAGER" install -y \
     nano \
-    openssh-server \
+    tar \
     wget
 
 # Install code-server
-curl -fsSL https://code-server.dev/install.sh | sh
+curl -fsSL https://code-server.dev/install.sh | sh -s -- --version "$CODE_SERVER_VERSION"
 
 # Install required extensions
 extensions=(
@@ -26,9 +62,32 @@ extensions=(
     'ritwickdey.liveserver'
     'vscode-icons-team.vscode-icons'
 )
-for extension in ${extensions[@]}; 
-    do code-server --install-extension ${extension};
+for extension in "${extensions[@]}"
+do
+    # One unavailable extension should not abort the whole setup
+    if ! code-server --install-extension "$extension"
+    then
+        echo "WARNING: could not install extension ${extension}" >&2
+    fi
 done
 
-# Check installtion version
+# Check installation version
 code-server --version
+
+cat <<EOF
+
+Setup complete. Start the Web IDE with:
+
+    code-server --bind-addr 127.0.0.1:8080
+
+then open http://127.0.0.1:8080 in a browser.
+
+A password was generated during installation and is stored in:
+
+    ${HOME}/.config/code-server/config.yaml
+
+To run it in the background instead:
+
+    sudo systemctl enable --now code-server@\$USER
+
+EOF
