@@ -78,11 +78,11 @@ There are two ways to setup the local development environment which can be acces
     1. Install scripts are included for the following platforms:
         - Debian and Windows (WSL)
             ```
-            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | bash
+            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | sh
             ```
         - Amazon-Linux
             ```
-            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | bash
+            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | sh
             ```
     2. Feel free to contribute an install script for any other platform like CentOS, MacOS, Arch Linux etc, that would setup the local development environment in a single command.
 - Using Docker [make sure you have docker installed]
@@ -131,7 +131,13 @@ Welcome Screen             | Docker Access
 code-server generates one on first run and writes it to `~/.config/code-server/config.yaml`. In the Colab notebook it is printed for you when the code-server section runs. In a container it lives inside the container, so `docker exec <container> cat /home/player/.config/code-server/config.yaml`.
 
 **localtunnel shows a "tunnel password" page instead of the IDE.**
-That is localtunnel's own interstitial, not an error. It expects your public IP address, which you can get with `curl https://loca.lt/mytunnelpassword`.
+That is localtunnel's own interstitial, not an error. It expects the public IP of the machine running the localtunnel client — which is the Colab runtime, **not** the machine you are browsing from. The notebook prints it for you alongside the tunnel URL. To look it up again, run it *in a notebook cell* so it executes on the runtime:
+
+```
+!curl -s https://loca.lt/mytunnelpassword
+```
+
+Running that command on your own laptop returns your laptop's IP, which the interstitial will reject.
 
 **The tunnel URL is empty or the IDE never loads.**
 Check the code-server log before blaming the tunnel. If code-server exited during startup, the tunnel points at a port with nothing behind it.
