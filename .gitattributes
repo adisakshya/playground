@@ -1,0 +1,10 @@
+# Notebook JSON does not merge with a line-based diff. Two branches that edit
+# different cells still conflict, and a naive resolution can corrupt the file.
+# nbdime merges notebooks cell by cell instead.
+#
+# Enable it locally once:
+#
+#     pip install nbdime
+#     nbdime config-git --enable --global
+#
+*.ipynb merge=nbdime diff=nbdime

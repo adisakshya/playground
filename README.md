@@ -12,13 +12,14 @@
 ## Prerequisites
 
 - Make sure you have a google account.
+- **For SSH access only:** an [ngrok](https://dashboard.ngrok.com/signup) account. The notebook prompts for an authtoken, which you copy from your ngrok dashboard. Not required if you only use the Web IDE.
 
 ## Getting Started
 
 The ```playground.ipynb``` sets up the development environment which can be accessed in the following two ways:
 
 1. Web IDE
-    1. [code-server](https://github.com/cdr/code-server) is used to provided an efficient and securely accessible Web IDE in the colab development environment.
+    1. [code-server](https://github.com/coder/code-server) is used to provided an efficient and securely accessible Web IDE in the colab development environment.
     2. Secure HTTPs is included when exposing code-server to the internet.
     3. The URL to the Web IDE is generated during execution of the colab-notebook and can be different everytime the notebook is executed.
 
@@ -77,11 +78,11 @@ There are two ways to setup the local development environment which can be acces
     1. Install scripts are included for the following platforms:
         - Debian and Windows (WSL)
             ```
-            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/debian.sh | sh
             ```
         - Amazon-Linux
             ```
-            curl -fsSl https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | sh
+            curl -fsSL https://raw.githubusercontent.com/adisakshya/playground/master/local/shell/amazon-linux.sh | sh
             ```
     2. Feel free to contribute an install script for any other platform like CentOS, MacOS, Arch Linux etc, that would setup the local development environment in a single command.
 - Using Docker [make sure you have docker installed]
@@ -121,3 +122,26 @@ Code from your laptop, PC or remote VM with a consistent development environment
 Welcome Screen             | Docker Access
 :-------------------------:|:--------------------------:
 ![](./screenshots/laptop/4-local-code-server-welcome-screen.png)   | ![](./screenshots/laptop/5-local-code-server-docker.png)
+
+---
+
+# Troubleshooting
+
+**The Web IDE asks for a password and I don't have one.**
+code-server generates one on first run and writes it to `~/.config/code-server/config.yaml`. In the Colab notebook it is printed for you when the code-server section runs. In a container it lives inside the container, so `docker exec <container> cat /home/player/.config/code-server/config.yaml`.
+
+**localtunnel shows a "tunnel password" page instead of the IDE.**
+That is localtunnel's own interstitial, not an error. It expects your public IP address, which you can get with `curl https://loca.lt/mytunnelpassword`.
+
+**The tunnel URL is empty or the IDE never loads.**
+Check the code-server log before blaming the tunnel. If code-server exited during startup, the tunnel points at a port with nothing behind it.
+
+**`ssh` says `Permission denied` with the password I set.**
+Root login over SSH has to be enabled explicitly, and the daemon has to read that configuration before it starts. If you are running an older copy of the notebook, this did not work at all.
+
+**The Colab session disconnects while I'm working.**
+Colab enforces idle and maximum session limits. See [#9](https://github.com/adisakshya/playground/issues/9).
+
+# License
+
+Released under the [MIT License](./LICENSE).
