@@ -13,7 +13,7 @@ The notebook:
 1. Clones the exact Playground ref that contains its runtime scripts.
 2. Installs the latest code-server release using Coder's supported installer.
 3. Starts code-server on the runtime loopback interface and confirms `/healthz` responds.
-4. Displays the editor through Colab's supported Python port-proxy wrapper.
+4. Prints a direct Colab kernel-proxy URL for the editor.
 
 The first successful run prints a generated code-server password. Reruns preserve it for the lifetime of the Colab runtime. The runtime is ephemeral; commit and push workspace changes before the session ends.
 
