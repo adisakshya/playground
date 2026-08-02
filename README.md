@@ -11,7 +11,7 @@ The native Colab port-proxy implementation is being validated in the `agent/cola
 The notebook:
 
 1. Clones the exact Playground ref that contains its runtime scripts.
-2. Installs a pinned code-server release with checksum validation.
+2. Installs the latest code-server release using Coder's supported installer.
 3. Starts code-server on the runtime loopback interface and confirms `/healthz` responds.
 4. Displays the editor through Colab's supported Python port-proxy wrapper.
 
