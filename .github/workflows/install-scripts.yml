@@ -1,0 +1,51 @@
+name: Install scripts
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# Both jobs run the installers for real, which is the only way to catch a
+# package that no longer exists or a download that has moved. Travis did this
+# and the first pass of the Actions migration dropped it, leaving shellcheck
+# as the only coverage - which cannot see any of that.
+permissions: {}
+
+jobs:
+  debian:
+    name: Debian / WSL script
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      # Exactly the pipeline the README advertises, so a regression in how the
+      # script is invoked is caught too, not just a regression inside it.
+      - name: Run debian.sh
+        run: bash local/shell/debian.sh
+
+      - name: Confirm code-server is installed and pinned
+        run: |
+          set -euo pipefail
+          expected="$(grep -oP 'CODE_SERVER_VERSION:-\K[0-9.]+' local/shell/debian.sh)"
+          actual="$(code-server --version | head -1 | cut -d' ' -f1)"
+          echo "expected=${expected} actual=${actual}"
+          [ "$expected" = "$actual" ]
+
+  amazon-linux:
+    name: Amazon Linux script
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      # Mounted into the container rather than using `container:`, because
+      # actions/checkout inside a bare amazonlinux image has no git or tar to
+      # work with. This mirrors what the Travis job did.
+      - name: Run amazon-linux.sh in an Amazon Linux container
+        run: |
+          docker run --rm \
+            -v "${PWD}/local/shell/amazon-linux.sh:/tmp/install.sh:ro" \
+            amazonlinux:2023 bash /tmp/install.sh

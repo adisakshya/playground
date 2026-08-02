@@ -65,7 +65,8 @@ SSH Connection             | CPU Architecture Information
 
 # Local Playground
 
-[![Build Status](https://travis-ci.com/adisakshya/playground.svg?branch=master)](https://travis-ci.com/adisakshya/playground)
+[![Lint](https://github.com/adisakshya/playground/actions/workflows/lint.yml/badge.svg)](https://github.com/adisakshya/playground/actions/workflows/lint.yml)
+[![Notebook](https://github.com/adisakshya/playground/actions/workflows/notebook.yml/badge.svg)](https://github.com/adisakshya/playground/actions/workflows/notebook.yml)
 
 - Setup your minimal customized local development environment.
 - Preserve battery life when you're on the go.

@@ -1,0 +1,55 @@
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# Nothing here needs write access, and fork PRs must not receive any.
+permissions: {}
+
+jobs:
+  shellcheck:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Run shellcheck
+        run: shellcheck local/shell/*.sh
+
+  yamllint:
+    name: YAML
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Run yamllint
+        run: |
+          pip install --quiet yamllint
+          yamllint -c .yamllint.yml --strict .github/workflows local/docker/docker-compose.yml
+
+  version-drift:
+    name: Version file matches Dockerfile
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      # The release tag comes from VERSION. The Dockerfile carries its own
+      # copy in PLAYGROUND_VERSION, so assert they agree rather than scraping
+      # one out of the other - a scrape that silently returns nothing produces
+      # an untagged push, which is how the Travis config was written.
+      - name: Compare VERSION with PLAYGROUND_VERSION
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          dockerfile="$(grep -oP 'PLAYGROUND_VERSION[ =]\K[0-9][^ ]*' local/docker/Dockerfile)"
+          echo "VERSION=${version}  Dockerfile=${dockerfile}"
+          if [ "$version" != "$dockerfile" ]
+          then
+            echo "::error::VERSION (${version}) and the Dockerfile's PLAYGROUND_VERSION (${dockerfile}) disagree" >&2
+            exit 1
+          fi
