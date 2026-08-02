@@ -2,7 +2,7 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adisakshya/playground/blob/master/remote/playground.ipynb)
 
-Remote Playground provisions a browser-based development workspace in Google Colab using [code-server](https://github.com/coder/code-server). It is intentionally a **code-server-only** workflow: it does not install SSH, ngrok, Docker, Localtunnel, or personal Dotfiles.
+Remote Playground provisions a bare [code-server](https://github.com/coder/code-server) installation in Google Colab. It intentionally installs no repository, extensions, SSH, ngrok, Docker, Localtunnel, or personal Dotfiles.
 
 ## Colab pilot
 
@@ -15,7 +15,7 @@ The notebook:
 3. Starts code-server on the runtime loopback interface and confirms `/healthz` responds.
 4. Prints a direct Colab kernel-proxy URL for the editor.
 
-The first successful run prints a generated code-server password. Reruns preserve it for the lifetime of the Colab runtime. The runtime is ephemeral; commit and push workspace changes before the session ends.
+The first successful run prints a generated code-server password. Reruns preserve it for the lifetime of the Colab runtime. The runtime is ephemeral; commit and push changes in any repository you clone before the session ends.
 
 Before treating the Colab proxy as a supported replacement for Localtunnel, validate login, file editing and saving, the integrated terminal, refresh/reconnect, and a 20–30 minute active session. The notebook includes this checklist.
 
@@ -97,7 +97,7 @@ The notebook first confirms the local code-server health endpoint, then displays
 If code-server is healthy but the iframe is unusable, record the failure against the native-proxy validation issue; this path is not supported until the Colab checklist has passed.
 
 **The Colab session disconnects while I'm working.**
-Colab enforces idle and maximum session limits. The runtime cannot be kept alive indefinitely. Commit and push workspace changes before ending a session, then reopen the notebook and rerun it to recover. See [#9](https://github.com/adisakshya/playground/issues/9).
+Colab enforces idle and maximum session limits. The runtime cannot be kept alive indefinitely. Commit and push changes in any repository before ending a session, then reopen the notebook and rerun it to recover. See [#9](https://github.com/adisakshya/playground/issues/9).
 
 # License
 

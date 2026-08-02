@@ -4,7 +4,6 @@
 set -euo pipefail
 
 PORT="${CODE_SERVER_PORT:-8000}"
-WORKSPACE_DIR="${PLAYGROUND_WORKSPACE_DIR:-/content/workspace}"
 LOG_DIR="${PLAYGROUND_LOG_DIR:-/content/playground-logs}"
 PID_FILE="${LOG_DIR}/code-server.pid"
 
@@ -13,7 +12,7 @@ if [[ -z "${CODE_SERVER_PASSWORD:-}" ]]; then
   exit 1
 fi
 
-mkdir -p "$WORKSPACE_DIR" "$LOG_DIR"
+mkdir -p "$LOG_DIR"
 
 if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
   echo "==> code-server is already running (PID $(cat "$PID_FILE"))"
@@ -21,7 +20,7 @@ else
   rm -f "$PID_FILE"
   echo "==> Starting code-server on 127.0.0.1:${PORT}"
   nohup env PASSWORD="$CODE_SERVER_PASSWORD" \
-    code-server --auth password --bind-addr "127.0.0.1:${PORT}" "$WORKSPACE_DIR" \
+    code-server --auth password --bind-addr "127.0.0.1:${PORT}" \
     >"${LOG_DIR}/code-server.out" 2>"${LOG_DIR}/code-server.err" < /dev/null &
   echo "$!" > "$PID_FILE"
 fi
