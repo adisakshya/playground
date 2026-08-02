@@ -1,0 +1,37 @@
+name: Remote runtime
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  smoke-test:
+    name: Install and start code-server
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      - name: Validate runtime scripts
+        run: shellcheck remote/scripts/*.sh
+
+      - name: Bootstrap and install code-server
+        run: |
+          set -euo pipefail
+          export PLAYGROUND_LOG_DIR="${RUNNER_TEMP}/playground-logs"
+          export PLAYGROUND_WORKSPACE_DIR="${RUNNER_TEMP}/workspace"
+          export CODE_SERVER_PASSWORD="ci-only-password"
+          bash remote/scripts/bootstrap-colab.sh
+          bash remote/scripts/install-code-server.sh
+          bash remote/scripts/start-code-server.sh
+
+      - name: Confirm code-server health endpoint
+        run: |
+          set -euo pipefail
+          export PLAYGROUND_LOG_DIR="${RUNNER_TEMP}/playground-logs"
+          export CODE_SERVER_PORT=8000
+          bash remote/scripts/check-code-server.sh

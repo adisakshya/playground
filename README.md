@@ -2,66 +2,22 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adisakshya/playground/blob/master/remote/playground.ipynb)
 
-- A remote development environment powered by Google Colab.
-- Take advantage of Google Cloud servers to speed up builds, tests, compilation and more.
-- Code from any device using browser or SSH.
-- All intensive computations runs on Google Cloud server.
-- Preserve battery life when you're on the go.
-- Perform quick experiments or prototype something.
+Remote Playground provisions a browser-based development workspace in Google Colab using [code-server](https://github.com/coder/code-server). It is intentionally a **code-server-only** workflow: it does not install SSH, ngrok, Docker, Localtunnel, or personal Dotfiles.
 
-## Prerequisites
+## Colab pilot
 
-- Make sure you have a google account.
-- **For SSH access only:** an [ngrok](https://dashboard.ngrok.com/signup) account. The notebook prompts for an authtoken, which you copy from your ngrok dashboard. Not required if you only use the Web IDE.
+The native Colab port-proxy implementation is being validated in the `agent/colab-native-proxy-pilot` branch. Open that branch's `remote/playground.ipynb` in Colab and run the cells in order.
 
-## Getting Started
+The notebook:
 
-The ```playground.ipynb``` sets up the development environment which can be accessed in the following two ways:
+1. Clones the exact Playground ref that contains its runtime scripts.
+2. Installs a pinned code-server release with checksum validation.
+3. Starts code-server on the runtime loopback interface and confirms `/healthz` responds.
+4. Displays the editor through Colab's supported Python port-proxy wrapper.
 
-1. Web IDE
-    1. [code-server](https://github.com/coder/code-server) is used to provided an efficient and securely accessible Web IDE in the colab development environment.
-    2. Secure HTTPs is included when exposing code-server to the internet.
-    3. The URL to the Web IDE is generated during execution of the colab-notebook and can be different everytime the notebook is executed.
+The first successful run prints a generated code-server password. Reruns preserve it for the lifetime of the Colab runtime. The runtime is ephemeral; commit and push workspace changes before the session ends.
 
-2. Terminal based system with SSH access
-    1. The SSH connect command is generated during execution of the colab-notebook.
-    2. Hostname can be different everytime the notebook is executed.
-
-## Remote Playground In Action
-
-Code from your laptop, PC, chromebook, tablet and mobile with a consistent development environment.
-
-#### Web IDE
-
-1. Access from laptop/desktop
-
-Welcome Screen             | CPU Architecture Information
-:-------------------------:|:--------------------------:
-![](./screenshots/laptop/1-code-server-welcome-screen.png)   | ![](./screenshots/laptop/2-cpu-architecture-information.png)
-
-
-2. Access from mobile
-
-Welcome Screen             | Secure HTTPs               |  CPU Architecture Information
-:-------------------------:|:--------------------------:|:------------------:
-![](./screenshots/mobile/1-code-server-welcome-screen.png)   | ![](./screenshots/mobile/3-secure-https-connection.png)  | ![](./screenshots/mobile/2-cpu-architecture-information.png)
-
-
----
-
-#### SSH Access
-
-1. Access from laptop/desktop
-
-SSH Connection             |
-:-------------------------:|
-![](./screenshots/laptop/3-ssh-connection.png)
-
-2. Access from Mobile using [Termux](https://play.google.com/store/apps/details?id=com.termux&hl=en_IN&gl=US)
-
-SSH Connection             | CPU Architecture Information          
-:-------------------------:|:--------------------------:
-![](./screenshots/mobile/4-termux-ssh-connection.png)   | ![](./screenshots/mobile/5-cpu-architecture-information.png)
+Before treating the Colab proxy as a supported replacement for Localtunnel, validate login, file editing and saving, the integrated terminal, refresh/reconnect, and a 20–30 minute active session. The notebook includes this checklist.
 
 # Local Playground
 
@@ -129,35 +85,19 @@ Welcome Screen             | Docker Access
 # Troubleshooting
 
 **The Web IDE asks for a password and I don't have one.**
-code-server generates one on first run and writes it to `~/.config/code-server/config.yaml`. In the Colab notebook it is printed for you when the code-server section runs. In a container it lives inside the container, so `docker exec <container> cat /home/player/.config/code-server/config.yaml`.
+The Colab notebook generates a strong password on first run and prints it only after code-server is healthy. Re-running the notebook preserves it for the current runtime. In a local container, code-server stores its generated password in `~/.config/code-server/config.yaml`.
 
-**localtunnel shows a "tunnel password" page instead of the IDE.**
-That is localtunnel's own interstitial, not an error. It expects the public IP of the machine running the localtunnel client — which is the Colab runtime, **not** the machine you are browsing from. The notebook prints it for you alongside the tunnel URL. To look it up again, run it *in a notebook cell* so it executes on the runtime:
-
-```
-!curl -s https://loca.lt/mytunnelpassword
-```
-
-Running that command on your own laptop returns your laptop's IP, which the interstitial will reject.
-
-**The tunnel URL is empty or the IDE never loads.**
-Check the code-server log before blaming the tunnel — if code-server exited during startup, the tunnel points at a port with nothing behind it. In the Colab notebook the logs are in `/root/playground-logs/`:
+**The Colab editor does not load or reconnect.**
+The notebook first confirms the local code-server health endpoint, then displays it through Colab's native port proxy. Check the startup logs:
 
 ```
-!tail -n 20 /root/playground-logs/code_server.err
+!tail -n 50 /content/playground-logs/code-server.err
 ```
 
-**`ssh` says `Permission denied` with the password I set.**
-Root login over SSH is disabled by default (`PermitRootLogin prohibit-password`), and sshd reads its configuration only at startup — so both `PermitRootLogin yes` and `PasswordAuthentication yes` have to be in effect *before* the daemon is launched. Check what sshd actually resolved, rather than what any one file asks for:
-
-```
-sshd -T | grep -E 'permitrootlogin|passwordauthentication'
-```
-
-If either value is wrong, fix the configuration and restart sshd. Note that a drop-in in `/etc/ssh/sshd_config.d/` which sorts earlier wins: sshd keeps the *first* value it obtains for a keyword, and cloud images commonly ship `60-cloudimg-settings.conf` with `PasswordAuthentication no`.
+If code-server is healthy but the iframe is unusable, record the failure against the native-proxy validation issue; this path is not supported until the Colab checklist has passed.
 
 **The Colab session disconnects while I'm working.**
-Colab enforces idle and maximum session limits. See [#9](https://github.com/adisakshya/playground/issues/9).
+Colab enforces idle and maximum session limits. The runtime cannot be kept alive indefinitely. Commit and push workspace changes before ending a session, then reopen the notebook and rerun it to recover. See [#9](https://github.com/adisakshya/playground/issues/9).
 
 # License
 

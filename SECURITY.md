@@ -10,9 +10,7 @@ Include what you were running (Colab notebook, install script, or container), wh
 
 Playground exists to make a development environment reachable from elsewhere, so several things that would be alarming in another project are the intended behaviour here. Understanding them is the point of this document.
 
-**The Colab tunnels are public.** Both access paths publish a local port to the open internet — the Web IDE through localtunnel, and SSH through an ngrok TCP tunnel. Anyone holding the URL can reach it for the lifetime of the session, and ngrok TCP endpoints are a known scanning target. Treat the generated URLs as credentials, and do not leave a session running unattended.
-
-**The root password is the only thing in front of SSH.** Treat it as a real credential. Leave the notebook's password field blank and it generates a strong one for you, printing it once — that is the recommended path. If you set your own, never pick something guessable: the endpoint it protects is reachable by anyone who finds it, and `root` is the first account anyone tries. Do not paste it into shared notebook output either: Colab's `private_outputs` setting keeps outputs out of the saved `.ipynb`, but a screenshot or a shared screen defeats that.
+**The Colab proxy is still an access boundary.** The notebook binds code-server only to the runtime loopback interface and presents it through Colab's native port proxy. Do not share the generated code-server password, notebook outputs, or an unattended session. This proxy path is a pilot until the documented validation checklist passes.
 
 **Mounting the Docker socket grants host root.** Where the documentation mounts `/var/run/docker.sock` into the container, anyone who reaches the Web IDE can start a privileged container and take over the host. The container also grants passwordless `sudo`. This is fine on a machine you own and fine for a throwaway VM; it is not fine on anything shared or production-adjacent.
 

@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
       - name: Run shellcheck
-        run: shellcheck local/shell/*.sh
+        run: shellcheck local/shell/*.sh remote/scripts/*.sh
 
   yamllint:
     name: YAML

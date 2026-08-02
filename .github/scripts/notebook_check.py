@@ -52,6 +52,8 @@ UNSAFE = (
     "apt-get",           # mutates the runner
     "playgroundLogs",    # writes under /root
     "StopExecution",     # deliberately raises to halt a Colab "Run all"
+    "PLAYGROUND_REPOSITORY",  # the Colab bootstrap clones a branch by design
+    "WORKSPACE_DIR",     # Colab-specific runtime state, defined by the skipped form cell
 )
 
 
