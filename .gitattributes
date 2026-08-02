@@ -1,0 +1,13 @@
+# Notebook JSON does not merge with a line-based diff. Two branches that edit
+# different cells still conflict, and a naive resolution can corrupt the file.
+# nbdime merges notebooks cell by cell instead.
+#
+# Enable it locally once:
+#
+#     pip install nbdime
+#     nbdime config-git --enable --global
+#
+# The driver name must be jupyternotebook: that is what `nbdime config-git`
+# registers in .gitconfig. Naming an unregistered driver here makes git fall
+# back to a line-based merge silently, with no warning that it did so.
+*.ipynb merge=jupyternotebook diff=jupyternotebook

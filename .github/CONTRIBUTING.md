@@ -10,7 +10,7 @@ Please search existing issues to avoid creating duplicates.
 
 ### Improve issues
 
-Some issues are created with missing information ([`needs more info`](https://github.com/adisakshya/playground/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22+label%3A%22needs+more+info%22)), are not reproducible, or are plain duplicates. You can help in finding reproducible steps and closing duplicates.
+Some issues are created with missing information, are not reproducible, or are plain duplicates. You can help by finding reproducible steps and closing duplicates. The [open issues](https://github.com/adisakshya/playground/issues) are a good place to start.
 
 ### Comment on issues
 
