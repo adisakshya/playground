@@ -1,0 +1,32 @@
+name: Notebook
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  check:
+    name: Validate and execute
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: '3.11'
+
+      - name: Install checker dependencies
+        run: pip install --quiet nbformat nbclient ipykernel
+
+      # Runs, in order: nbformat schema validation; compile() on every Python
+      # cell and bash -n on every %%shell cell; execution of the CI-safe cells;
+      # and a self-test that deliberately breaks a cell and asserts the runner
+      # reports it. The self-test is the part that keeps this job honest - a
+      # silently broken runner would otherwise pass forever.
+      - name: Check notebook
+        run: python .github/scripts/notebook_check.py all

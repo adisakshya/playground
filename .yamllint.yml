@@ -1,0 +1,16 @@
+# Config for the Lint workflow's yamllint job.
+#
+# Without a committed config, yamllint applies its defaults - 80-character
+# lines among them - which no GitHub Actions workflow of any substance
+# survives. Pinning the rules here keeps the job reproducible rather than
+# dependent on whatever the default happens to be.
+extends: default
+
+rules:
+  line-length:
+    max: 120
+  # GitHub Actions uses `on:` as a key, which YAML 1.1 reads as the boolean
+  # true. That is correct and intentional here, so only check values.
+  truthy:
+    check-keys: false
+  document-start: disable
