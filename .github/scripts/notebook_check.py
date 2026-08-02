@@ -103,11 +103,35 @@ def cmd_static(nb: dict) -> list[str]:
     return failures
 
 
+def rewrite_bang_escapes(source: str) -> str:
+    """Turn IPython ``!command`` escapes into something that fails loudly.
+
+    ``!command`` records a non-zero exit status in ``_exit_code`` and carries
+    on - it does not raise - so ``allow_errors=False`` never sees it and a
+    failing command reports success. Rewriting to subprocess with check=True
+    makes the exit status an exception the executor can actually catch.
+    """
+    lines = []
+    for line in source.split("\n"):
+        stripped = line.strip()
+        if stripped.startswith("!") and '"""' not in stripped:
+            command = stripped[1:]
+            indent = line[: len(line) - len(line.lstrip())]
+            lines.append(
+                f'{indent}__import__("subprocess").run(r"""{command}""", '
+                f"shell=True, check=True)"
+            )
+        else:
+            lines.append(line)
+    return "\n".join(lines)
+
+
 def build_runnable(nb: dict) -> tuple[dict, list[int], list[int]]:
     """Return a notebook containing only the CI-safe cells.
 
     %%shell becomes %%bash, which stock IPython provides and which behaves the
     same way for our purposes: run the body through a shell, fail on non-zero.
+    Line-level ! escapes are rewritten so they fail too - see above.
     """
     runnable = copy.deepcopy(nb)
     kept, skipped = [], []
@@ -122,6 +146,8 @@ def build_runnable(nb: dict) -> tuple[dict, list[int], list[int]]:
         new = copy.deepcopy(cell)
         if is_shell(source):
             new["source"] = source.replace("%%shell", "%%bash", 1).splitlines(keepends=True)
+        else:
+            new["source"] = rewrite_bang_escapes(source).splitlines(keepends=True)
         kept.append(index)
         cells.append(new)
     runnable["cells"] = cells
@@ -153,24 +179,39 @@ def cmd_execute(nb: dict) -> list[str]:
 
 
 def cmd_self_test(nb: dict) -> list[str]:
-    """Prove the executor actually fails when a cell raises.
+    """Prove the executor actually fails when a cell fails.
+
+    Two distinct failure modes, because they are caught by different
+    machinery and passing one says nothing about the other:
+
+      * a Python exception, which nbclient raises directly
+      * a failing shell escape, which IPython would otherwise swallow
 
     Without this, a silently broken runner would report success forever.
     """
-    broken = copy.deepcopy(nb)
-    for cell in broken["cells"]:
-        if cell["cell_type"] == "code" and not any(
-            marker in "".join(cell["source"]) for marker in UNSAFE
-        ):
-            cell["source"] = ['raise RuntimeError("deliberate failure for self-test")']
-            break
-    else:
-        return ["self-test could not find a CI-safe cell to break"]
+    cases = {
+        "python exception": ['raise RuntimeError("deliberate failure for self-test")'],
+        "failing shell escape": ["!exit 7"],
+    }
 
-    if cmd_execute(broken):
-        print("  self-test: executor correctly reported the deliberate failure")
-        return []
-    return ["self-test: executor did NOT fail on a cell that raises"]
+    failures = []
+    for name, source in cases.items():
+        broken = copy.deepcopy(nb)
+        for cell in broken["cells"]:
+            if cell["cell_type"] == "code" and not any(
+                marker in "".join(cell["source"]) for marker in UNSAFE
+            ):
+                cell["source"] = source
+                break
+        else:
+            failures.append(f"self-test ({name}): no CI-safe cell available to break")
+            continue
+
+        if cmd_execute(broken):
+            print(f"  self-test ({name}): correctly reported as a failure")
+        else:
+            failures.append(f"self-test ({name}): executor did NOT fail")
+    return failures
 
 
 COMMANDS = {
