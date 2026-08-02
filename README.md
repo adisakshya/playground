@@ -140,7 +140,11 @@ That is localtunnel's own interstitial, not an error. It expects the public IP o
 Running that command on your own laptop returns your laptop's IP, which the interstitial will reject.
 
 **The tunnel URL is empty or the IDE never loads.**
-Check the code-server log before blaming the tunnel. If code-server exited during startup, the tunnel points at a port with nothing behind it.
+Check the code-server log before blaming the tunnel — if code-server exited during startup, the tunnel points at a port with nothing behind it. In the Colab notebook the logs are in `/root/playground-logs/`:
+
+```
+!tail -n 20 /root/playground-logs/code_server.err
+```
 
 **`ssh` says `Permission denied` with the password I set.**
 Root login over SSH is disabled by default (`PermitRootLogin prohibit-password`), and sshd reads its configuration only at startup — so both `PermitRootLogin yes` and `PasswordAuthentication yes` have to be in effect *before* the daemon is launched. Check what sshd actually resolved, rather than what any one file asks for:
